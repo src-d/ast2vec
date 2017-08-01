@@ -33,6 +33,7 @@ class Repo2NBOWTests(unittest.TestCase):
         id2vec.tokens[0] = "xxyyzz"
         id2vec._token2index["xxyyzz"] = 0
         xxyyzz = Repo2nBOW(
+            bblfsh_endpoint=os.getenv("BBLFSH_ENDPOINT", "0.0.0.0:9432"),
             id2vec=id2vec, docfreq=df, linguist=tests.ENRY, timeout=600)
         nbow = xxyyzz.convert_repository(os.path.join(basedir, "..", ".."))
         self.assertIsInstance(nbow, dict)
@@ -49,7 +50,8 @@ class Repo2NBOWTests(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as file:
             args = argparse.Namespace(
                 id2vec=id2vec, docfreq=df, linguist=tests.ENRY,
-                gcs_bucket=None, output=file.name, bblfsh_endpoint=None, timeout=None,
+                gcs_bucket=None, output=file.name,
+                bblfsh_endpoint=os.getenv("BBLFSH_ENDPOINT", "0.0.0.0:9432"), timeout=None,
                 repository=os.path.join(basedir, "..", ".."))
             repo2nbow_entry(args)
             self.assertTrue(os.path.isfile(file.name))
