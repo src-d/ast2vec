@@ -13,6 +13,8 @@ from ast2vec.id_embedding import preprocess, run_swivel, postprocess, swivel
 from ast2vec.repo2.base import Repo2Base
 from ast2vec.repo2.coocc import repo2coocc_entry, repos2coocc_entry
 from ast2vec.repo2.nbow import repo2nbow_entry, repos2nbow_entry, joinbow_entry
+from ast2vec.repo2.prox import repo2prox_entry, MATRIX_TYPES
+from ast2vec.repo2.proxbase import EDGE_TYPES
 
 
 def main():
@@ -153,6 +155,38 @@ def main():
         "output", help="Where to write the merged nBOW.")
     joinbow_parser.add_argument("-f", "--filter", default="*.asdf",
                                 help="glob filter on file names")
+
+    repo2prox_parser = subparsers.add_parser(
+        "repo2prox", formatter_class=argparse.RawTextHelpFormatter,
+        help="Produce the proximity matrix from a Git repository.")
+    repo2prox_parser.set_defaults(handler=repo2prox_entry)
+    repo2prox_parser.add_argument(
+        "-r", "--repository", required=True,
+        help="URL or path to a Git repository.")
+    repo2prox_parser.add_argument(
+        "--linguist", help="Path to src-d/enry executable.")
+    repo2prox_parser.add_argument(
+        "-m", "--matrix-type", required=True, choices=MATRIX_TYPES.keys(),
+        help="Type of proximity matrix.")
+    repo2prox_parser.add_argument(
+        "-o", "--output", required=True,
+        help="Output path where .asdf result will be stored.")
+    repo2prox_parser.add_argument(
+        "--edges", nargs="+", default=EDGE_TYPES, choices=EDGE_TYPES,
+        help="If not specified, then node-to-node adjacency is assumed. Suppose we have two "
+        "connected nodes A and B:\n"
+        "r - connect node roles with each other.\n"
+        "t - connect node tokens with each other.\n"
+        "rt - connect node tokens with node roles.\n"
+        "R - connect node A roles with node B roles.\n"
+        "T - connect node A tokens with node B tokens.\n"
+        "RT - connect node A roles(tokens) with node B tokens(roles).")
+    repo2prox_parser.add_argument(
+        "--bblfsh", help="Babelfish server's endpoint, e.g. 0.0.0.0:9432.",
+        dest="bblfsh_endpoint")
+    repo2prox_parser.add_argument(
+        "--timeout", type=int, default=Repo2Base.DEFAULT_BBLFSH_TIMEOUT,
+        help="Babelfish timeout - longer requests are dropped.")
 
     preproc_parser = subparsers.add_parser(
         "id2vec_preproc", help="Convert co-occurrence CSR matrices to Swivel dataset.")

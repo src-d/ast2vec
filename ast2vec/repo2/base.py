@@ -1,4 +1,6 @@
 from collections import namedtuple
+from functools import partial
+import json
 import logging
 import multiprocessing
 import os
@@ -17,8 +19,7 @@ import Stemmer
 from ast2vec.cloning import RepoCloner
 from ast2vec import resolve_symlink
 
-GeneratorResponse = namedtuple("GeneratorResponse",
-                               ["filepath", "filename", "response"])
+GeneratorResponse = namedtuple("GeneratorResponse", ["filepath", "filename", "response"])
 
 
 class Repo2Base:
@@ -29,7 +30,7 @@ class Repo2Base:
     MODEL_CLASS = None  #: Must be defined in the children.
     NAME_BREAKUP_RE = re.compile(r"[^a-zA-Z]+")  #: Regexp to split source code identifiers.
     STEM_THRESHOLD = 6  #: We do not stem splitted parts shorter than or equal to this size.
-    MAX_TOKEN_LENGTH = 256  #: We cut identifiers longer than thi value.
+    MAX_TOKEN_LENGTH = 256  #: We cut identifiers longer than this value.
     DEFAULT_BBLFSH_TIMEOUT = 10  #: Longer requests are dropped.
     MAX_FILE_SIZE = 200000
 
@@ -343,9 +344,7 @@ class RepoTransformer(Transformer):
         os.makedirs(output, exist_ok=True)
 
         with multiprocessing.Pool(processes=num_processes) as pool:
-            pool.starmap(type(self).process_entry,
-                         zip(inputs, [self._args] * len(inputs),
-                             [output] * len(inputs)))
+            pool.map(partial(type(self).process_entry, args=self._args, outdir=output), inputs)
 
     def dependencies(self) -> list:
         """
@@ -391,7 +390,7 @@ def _sanitize_kwargs(args, *blacklist):
     return payload_args
 
 
-def repo2_entry(args, payload_class):
+def repo2_entry(args, payload_class, *blacklist):
     """
     Invokes payload_class(\*\*args).process_repo() on the specified repository.
 
@@ -402,11 +401,11 @@ def repo2_entry(args, payload_class):
     :return: None
     """
     ensure_bblfsh_is_running_noexc()
-    payload_args = _sanitize_kwargs(args, "repository")
+    payload_args = _sanitize_kwargs(args, "repository", *blacklist)
     payload_class(**payload_args).process_repo(args.repository, args.output)
 
 
-def repos2_entry(args, payload_class):
+def repos2_entry(args, payload_class, *blacklist):
     """
     Invokes payload_class(\*\*args).transform() for every repository in parallel processes.
 
@@ -418,5 +417,5 @@ def repos2_entry(args, payload_class):
     :return: None
     """
     ensure_bblfsh_is_running_noexc()
-    payload_args = _sanitize_kwargs(args, "input")
+    payload_args = _sanitize_kwargs(args, "input", *blacklist)
     payload_class(**payload_args).transform(args.input, args.output)

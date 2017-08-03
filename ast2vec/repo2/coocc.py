@@ -18,7 +18,7 @@ class Repo2Coocc(Repo2CooccBase):
         return {}
 
     def _get_result(self, word2ind, mat):
-        words = [p[1] for p in sorted((word2ind[w], w) for w in word2ind)]
+        words = sorted(word2ind, key=word2ind.get)
         return words, mat
 
     def _update_dict(self, generator, word2ind, tokens):
