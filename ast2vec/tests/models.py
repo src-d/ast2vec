@@ -6,6 +6,7 @@ BOW = "bow_1000.asdf"
 NBOW = "nbow_1000.asdf"
 COOCC = "coocc.asdf"
 VOCCOOCC = "voccoocc.asdf"
+UAST = "uast.asdf"
 
 DATA_DIR_SOURCE = path.join(path.dirname(__file__), "source")
 SOURCE_FILENAME = "test_example"

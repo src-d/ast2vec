@@ -5,7 +5,7 @@ import Stemmer
 
 class TokenParser:
     """
-    Token parser.
+    Common utilities for splitting and stemming tokens.
     """
     NAME_BREAKUP_RE = re.compile(r"[^a-zA-Z]+")  #: Regexp to split source code identifiers.
     STEM_THRESHOLD = 6  #: We do not stem splitted parts shorter than or equal to this size.

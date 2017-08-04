@@ -6,12 +6,16 @@ from scipy.sparse import coo_matrix
 from ast2vec.bblfsh_roles import SIMPLE_IDENTIFIER
 from ast2vec.token_parser import TokenParser
 from ast2vec.repo2.base import Repo2Base
+from ast2vec.token_parser import TokenParser
 
 
 class Repo2CooccBase(Repo2Base):
     """
     Converts UASTs to co-occurrence matrices.
     """
+    def __init__(self, *args, **kwargs):
+        super(Repo2CooccBase, self).__init__(*args, **kwargs)
+        self._token_parser = TokenParser()
 
     def __init__(self, *args, **kwargs):
         super(Repo2CooccBase, self).__init__(*args, **kwargs)

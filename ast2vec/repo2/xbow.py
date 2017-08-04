@@ -3,6 +3,7 @@ from collections import defaultdict
 from ast2vec.bblfsh_roles import SIMPLE_IDENTIFIER
 from ast2vec.token_parser import TokenParser
 from ast2vec.repo2.base import Repo2Base
+from ast2vec.token_parser import TokenParser
 
 
 class Repo2xBOW(Repo2Base):
