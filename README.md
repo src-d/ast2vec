@@ -60,8 +60,8 @@ the intermediate results in Tensorboard using `--logs`.
 10. Publish generated models to the Google Cloud Storage.
 
 1-6 is performed with `repo2coocc` tool / `Repo2CooccTransformer` class,
-7 with `preproc` / `PreprocessTransformer`, 8 with `train` / `SwivelTransformer`,
-9 with `postproc` / `PostprocessTransformer` and 10 with `publish`.
+7 with `id2vec_preproc` / `id_embedding.PreprocessTransformer`, 8 with `id2vec_train` / `id_embedding.SwivelTransformer`,
+9 with `id2vec_postproc` / `id_embedding.PostprocessTransformer` and 10 with `publish`.
 
 #### Weighted Bag of Vectors
 

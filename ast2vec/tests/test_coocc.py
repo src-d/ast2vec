@@ -7,7 +7,7 @@ import ast2vec.tests.models as paths
 
 class CooccurrencesTests(unittest.TestCase):
     def setUp(self):
-        self.model = Cooccurrences(
+        self.model = Cooccurrences().load(
             source=os.path.join(os.path.dirname(__file__), paths.COOCC))
 
     def test_tokens(self):

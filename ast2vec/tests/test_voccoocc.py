@@ -7,7 +7,7 @@ import ast2vec.tests.models as paths
 
 class CooccurrencesTests(unittest.TestCase):
     def setUp(self):
-        self.model = VocabularyCooccurrences(
+        self.model = VocabularyCooccurrences().load(
             source=os.path.join(os.path.dirname(__file__), paths.VOCCOOCC))
 
     def test_matrix(self):

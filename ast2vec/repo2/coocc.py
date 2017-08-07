@@ -30,16 +30,14 @@ class Repo2Coocc(Repo2CooccBase):
 class Repo2CooccTransformer(RepoTransformer):
     WORKER_CLASS = Repo2Coocc
 
-    @classmethod
-    def result_to_tree(cls, result):
+    def dependencies(self):
+        return []
+
+    def result_to_model_kwargs(self, result, url_or_path):
         vocabulary, matrix = result
         if not vocabulary:
             raise ValueError("Empty vocabulary")
-        return {
-            "tokens": merge_strings(vocabulary),
-            "matrix": disassemble_sparse_matrix(matrix),
-            "meta": generate_meta(cls.WORKER_CLASS.MODEL_CLASS.NAME, ast2vec.__version__)
-        }
+        return {"tokens": vocabulary, "matrix": matrix}
 
 
 def repo2coocc_entry(args):

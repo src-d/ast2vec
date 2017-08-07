@@ -29,7 +29,7 @@ setup(
                       "asdf>=1.2,<2.0",
                       "google-cloud-storage>=1.0,<2.0",
                       "python-dateutil",
-                      "modelforge>=0.1.0-alpha",
+                      "modelforge>=0.2.3-alpha",
                       "bblfsh>=0.0.4"] + typing,
     package_data={"": ["LICENSE", "README.md"]},
     classifiers=[

@@ -7,7 +7,7 @@ import ast2vec.tests.models as paths
 
 class DocumentFrequenciesTests(unittest.TestCase):
     def setUp(self):
-        self.model = DocumentFrequencies(
+        self.model = DocumentFrequencies().load(
             source=os.path.join(os.path.dirname(__file__), paths.DOCFREQ))
 
     def test_docs(self):

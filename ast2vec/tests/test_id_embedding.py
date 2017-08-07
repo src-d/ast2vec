@@ -12,7 +12,7 @@ import tensorflow as tf
 
 from ast2vec import DocumentFrequencies, swivel, Id2Vec
 from ast2vec.id_embedding import preprocess, run_swivel, postprocess, SwivelTransformer, \
-    PostprocessTransformer
+    PostprocessTransformer, PreprocessTransformer
 from ast2vec.tests.test_dump import captured_output
 
 
@@ -26,28 +26,28 @@ def prepare_file(path):
         subprocess.check_call(["gzip", "-dk", path + ".gz"])
 
 
-def prepare_shard(folder):
-    prepare_file(os.path.join(folder, "shard-000-000.pb"))
+def prepare_shard(dirname):
+    prepare_file(os.path.join(dirname, "shard-000-000.pb"))
 
 
-def prepare_postproc_files(folder):
+def prepare_postproc_files(dirname):
     for name in ("col_embedding.tsv", "row_embedding.tsv"):
-        prepare_file(os.path.join(folder, name))
+        prepare_file(os.path.join(dirname, name))
 
 
 def check_postproc_results(obj, id2vec_loc):
-    id2vec = Id2Vec(source=id2vec_loc)
+    id2vec = Id2Vec().load(source=id2vec_loc)
     obj.assertEqual(len(id2vec.tokens), obj.VOCAB)
     obj.assertEqual(id2vec.embeddings.shape, (obj.VOCAB, 50))
 
 
-def check_swivel_results(obj, folder):
-    files = sorted(os.listdir(folder))
+def check_swivel_results(obj, dirname):
+    files = sorted(os.listdir(dirname))
     obj.assertEqual(files, ["col_embedding.tsv", "row_embedding.tsv"])
-    with open(os.path.join(folder, "col_embedding.tsv")) as fin:
+    with open(os.path.join(dirname, "col_embedding.tsv")) as fin:
         col_embedding = fin.read().split("\n")
     obj.assertEqual(len(col_embedding), obj.VOCAB + 1)
-    with open(os.path.join(folder, "row_embedding.tsv")) as fin:
+    with open(os.path.join(dirname, "row_embedding.tsv")) as fin:
         row_embedding = fin.read().split("\n")
     obj.assertEqual(len(row_embedding), obj.VOCAB + 1)
 
@@ -79,6 +79,9 @@ class IdEmbeddingTests(unittest.TestCase):
             args.shard_size = self.VOCAB + 1
             self.assertRaises(ValueError, lambda: preprocess(args))
 
+    def test_preproc_transformer_logs(self):
+        self.assertTrue(PreprocessTransformer()._get_log_name())
+
     def test_preprocess(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             args = default_preprocess_params(tmpdir, self.VOCAB)
@@ -93,7 +96,7 @@ class IdEmbeddingTests(unittest.TestCase):
                 sorted(os.listdir(tmpdir)),
                 ["col_sums.txt", "col_vocab.txt", "docfreq.asdf", "row_sums.txt", "row_vocab.txt",
                  "shard-000-000.pb"])
-            df = DocumentFrequencies(source=os.path.join(tmpdir, "docfreq.asdf"))
+            df = DocumentFrequencies().load(source=os.path.join(tmpdir, "docfreq.asdf"))
             self.assertEqual(len(df), self.VOCAB)
             self.assertEqual(df.docs, len(os.listdir(args.input[0])) - 1)
             with open(os.path.join(tmpdir, "col_sums.txt")) as fin:
@@ -184,6 +187,9 @@ class IdEmbeddingTests(unittest.TestCase):
             sw.transform(**args)
             check_swivel_results(self, tmpdir)
 
+    def test_swivel_transformer_logs(self):
+        self.assertTrue(SwivelTransformer()._get_log_name())
+
     def test_postproc(self):
         with tempfile.NamedTemporaryFile(suffix=".asdf") as tmp:
             args = argparse.Namespace(
@@ -206,6 +212,9 @@ class IdEmbeddingTests(unittest.TestCase):
             postproc.transform(**args)
 
             check_postproc_results(self, tmp.name)
+
+    def test_postproc_transformer_logs(self):
+        self.assertTrue(PostprocessTransformer()._get_log_name())
 
 
 if __name__ == "__main__":

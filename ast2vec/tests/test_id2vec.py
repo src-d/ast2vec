@@ -9,7 +9,7 @@ import ast2vec.tests.models as paths
 
 class Id2VecTests(unittest.TestCase):
     def setUp(self):
-        self.model = Id2Vec(
+        self.model = Id2Vec().load(
             source=os.path.join(os.path.dirname(__file__), paths.ID2VEC))
 
     def test_embeddings(self):

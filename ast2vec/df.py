@@ -1,5 +1,9 @@
-from modelforge.model import Model, split_strings
+from modelforge import generate_meta
+from modelforge.model import Model, split_strings, write_model, merge_strings
 from modelforge.models import register_model
+import numpy
+
+import ast2vec
 
 
 @register_model
@@ -10,13 +14,14 @@ class DocumentFrequencies(Model):
     """
     NAME = "docfreq"
 
-    def load(self, tree):
-        self._docs = tree["docs"]
-        tokens = split_strings(tree["tokens"])
-        freqs = tree["freqs"]
+    def construct(self, docs, tokens, freqs):
+        self._docs = docs
         self._log.info("Building the docfreq dictionary...")
         self._df = dict(zip(tokens, freqs))
-        del tokens
+
+    def _load_tree(self, tree):
+        self.construct(docs=tree["docs"], tokens=split_strings(tree["tokens"]),
+                       freqs=tree["freqs"])
 
     def dump(self):
         return """Number of words: %d
@@ -55,3 +60,13 @@ Number of documents: %d""" % (
         Returns the number of tokens in the model.
         """
         return len(self._df)
+
+    def save(self, output, deps=None):
+        if not deps:
+            deps = tuple()
+        self._meta = generate_meta(self.NAME, ast2vec.__version__, *deps)
+        tokens = self.tokens()
+        freqs = numpy.array([self._df[t] for t in tokens], dtype=numpy.float32)
+        write_model(self._meta,
+                    {"docs": self.docs, "tokens": merge_strings(tokens), "freqs": freqs},
+                    output)

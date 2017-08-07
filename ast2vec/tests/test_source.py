@@ -6,7 +6,7 @@ from ast2vec import Source
 
 class SourceTests(unittest.TestCase):
     def setUp(self):
-        self.model = Source(source=paths.SOURCE)
+        self.model = Source().load(source=paths.SOURCE)
 
     def test_dump(self):
         dump = self.model.dump()

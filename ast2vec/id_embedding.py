@@ -6,17 +6,16 @@ from argparse import Namespace
 from collections import defaultdict
 
 import numpy
-import tensorflow as tf
-from modelforge.meta import generate_meta
-from modelforge.model import merge_strings, write_model
 from modelforge.progress_bar import progress_bar
 from scipy.sparse import csr_matrix
+import tensorflow as tf
 
-import ast2vec
 import ast2vec.swivel as swivel
 from ast2vec.coocc import Cooccurrences
+from ast2vec.df import DocumentFrequencies
+from ast2vec.id2vec import Id2Vec
+from ast2vec.token_parser import TokenParser
 from ast2vec.repo2.base import Transformer
-from ast2vec.repo2.nbow import Repo2nBOW
 
 
 class PreprocessTransformer(Transformer):
@@ -24,6 +23,7 @@ class PreprocessTransformer(Transformer):
     shard_size = 4096
 
     def __init__(self, vocabulary_size=None, shard_size=None):
+        super(PreprocessTransformer, self).__init__()
         if vocabulary_size is not None:
             self.vocabulary_size = vocabulary_size
         if shard_size is not None:
@@ -43,6 +43,9 @@ class PreprocessTransformer(Transformer):
                          input=X, df=df, shard_size=self.shard_size,
                          output=output)
         preprocess(args)
+
+    def _get_log_name(self):
+        return "id_preprocess"
 
 
 def preprocess(args):
@@ -67,7 +70,7 @@ def preprocess(args):
     skipped = 0
     for i, path in progress_bar(enumerate(inputs), log, expected_size=len(inputs)):
         try:
-            model = Cooccurrences(source=path)
+            model = Cooccurrences().load(source=path)
         except ValueError:
             skipped += 1
             log.warning("Skipped %s", path)
@@ -108,11 +111,9 @@ def preprocess(args):
     word_indices = {w: i for i, w in enumerate(chosen_words)}
     if args.df is not None:
         log.info("Writing the document frequencies to %s...", args.df)
-        write_model(generate_meta("docfreq", ast2vec.__version__), {
-            "tokens": merge_strings(chosen_words),
-            "freqs": chosen_freqs,
-            "docs": len(inputs) - skipped
-        }, args.df)
+        model = DocumentFrequencies()
+        model.construct(docs=len(inputs) - skipped, tokens=chosen_words, freqs=chosen_freqs)
+        model.save(args.df)
     del chosen_freqs
 
     if not os.path.exists(args.output):
@@ -130,7 +131,7 @@ def preprocess(args):
     ccmatrix = csr_matrix((vs, vs), dtype=numpy.int64)
     for i, path in progress_bar(enumerate(inputs), log, expected_size=len(inputs)):
         try:
-            model = Cooccurrences(path)
+            model = Cooccurrences().load(path)
         except ValueError:
             log.warning("Skipped %s", path)
             continue
@@ -233,6 +234,9 @@ class SwivelTransformer(Transformer):
 
         run_swivel(flags)
 
+    def _get_log_name(self):
+        return "id_swivel"
+
 
 def run_swivel(args):
     """
@@ -254,15 +258,18 @@ class PostprocessTransformer(Transformer):
         Merges row and column embeddings produced by Swivel and writes the
         Id2Vec model.
 
-        :param swivel_output_directory: folder that contains files after swivel training. The \
-                                        files are read from this folder and the model is written \
-                                        to the 'result'.
+        :param swivel_output_directory: directory that contains files after swivel training. The \
+                                        files are read from this directory and the model is \
+                                        written to the 'result'.
         :param result: file to store results
         :return: None
         """
         args = Namespace(swivel_output_directory=swivel_output_directory,
                          result=result)
         postprocess(args)
+
+    def _get_log_name(self):
+        return "id_postprocess"
 
 
 def postprocess(args):
@@ -289,7 +296,7 @@ def postprocess(args):
                     sys.stdout.flush()
                 prow, pcol = (l.split("\t", 1) for l in (lrow, lcol))
                 assert prow[0] == pcol[0]
-                tokens.append(prow[0][:Repo2nBOW.MAX_TOKEN_LENGTH])
+                tokens.append(prow[0][:TokenParser.MAX_TOKEN_LENGTH])
                 erow, ecol = \
                     (numpy.fromstring(p[1], dtype=numpy.float32, sep="\t")
                      for p in (prow, pcol))
@@ -297,7 +304,6 @@ def postprocess(args):
     log.info("Generating numpy arrays...")
     embeddings = numpy.array(embeddings, dtype=numpy.float32)
     log.info("Writing %s...", args.result)
-    write_model(generate_meta("id2vec", ast2vec.__version__), {
-        "tokens": merge_strings(tokens),
-        "embeddings": embeddings
-    }, args.result)
+    model = Id2Vec()
+    model.construct(embeddings=embeddings, tokens=tokens)
+    model.save(args.result)

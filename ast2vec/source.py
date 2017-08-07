@@ -1,19 +1,28 @@
-from bblfsh.github.com.bblfsh.sdk.protocol.generated_pb2 import ParseResponse
-from modelforge.model import Model, split_strings
+from modelforge.model import split_strings, merge_strings
 from modelforge.models import register_model
+
+from ast2vec.uast import UASTModel
 
 
 @register_model
-class Source(Model):
+class Source(UASTModel):
     """
     Model for source-code storage
     """
     NAME = "source"
 
-    def load(self, tree):
-        self._filenames = split_strings(tree["filenames"])
-        self._sources = split_strings(tree["sources"])
-        self._uasts = [ParseResponse.FromString(x) for x in tree["uasts"]]
+    def construct(self, filenames, sources, uasts):
+        super(Source, self).construct(filenames=filenames, uasts=uasts)
+        if not len(sources) == len(uasts) == len(filenames):
+            raise ValueError("Length of src_codes({}), uasts({}) and filenames({}) are not equal".
+                             format(len(sources), len(uasts), len(filenames)))
+        self._sources = sources
+        self._filenames_map = {r: i for i, r in enumerate(self._filenames)}
+
+    def _load_tree_kwargs(self, tree):
+        tree_kwargs = super(Source, self)._load_tree_kwargs(tree)
+        tree_kwargs["sources"] = split_strings(tree["sources"])
+        return tree_kwargs
 
     def dump(self):
         symbols_num = 100
@@ -28,16 +37,22 @@ class Source(Model):
         """
         return self._sources
 
-    @property
-    def uasts(self):
+    def __getitem__(self, item):
         """
-        Returns all usts of code in the saved repo
-        """
-        return self._uasts
+        Returns file name, source code and uast for the given file index.
 
-    @property
-    def filenames(self):
+        :param item: File index.
+        :return: name, source code, uast
         """
-        Returns all filenames in the saved repo
+        return (self._filenames[item],) + super(Source, self).__getitem__(item)
+
+    def __iter__(self):
         """
-        return self._filenames
+        Iterator over the items.
+        """
+        return zip(self._filenames, *super(Source, self).__iter__())
+
+    def _to_dict_to_save(self):
+        save_dict = super(Source, self)._to_dict_to_save()
+        save_dict["sources"] = merge_strings(self.sources)
+        return save_dict

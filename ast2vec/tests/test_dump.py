@@ -121,6 +121,23 @@ Number of words: 394
             dump_model(self._get_args(input="https://xxx"))
         self.assertEqual(out.getvalue(), self.ID2VEC_DUMP)
 
+    def test_gcs(self):
+        def route(url):
+            if url.endswith(gcs_backend.INDEX_FILE):
+                self.assertIn("custom", url)
+                return '{"models": {"id2vec": {' \
+                       '"92609e70-f79c-46b5-8419-55726e873cfc": ' \
+                       '{"url": "https://xxx"}}}}'.encode()
+            self.assertEqual("https://xxx", url)
+            with open(self._get_path(paths.ID2VEC), "rb") as fin:
+                return fin.read()
+
+        gcs_backend.requests = FakeRequests(route)
+        with captured_output() as (out, _, _):
+            dump_model(self._get_args(input="92609e70-f79c-46b5-8419-55726e873cfc",
+                                      gcs="custom"))
+        self.assertEqual(out.getvalue(), self.ID2VEC_DUMP)
+
     @staticmethod
     def _get_args(input=None, gcs=None, dependency=tuple()):
         return argparse.Namespace(input=input, gcs=gcs, dependency=dependency,

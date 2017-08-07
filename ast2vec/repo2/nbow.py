@@ -2,15 +2,14 @@ import logging
 import math
 from collections import defaultdict
 
-from modelforge.backends import create_backend
-from modelforge.meta import generate_meta
+from scipy.sparse import csr_matrix
 
-import ast2vec
+from ast2vec.bow import NBOW
 from ast2vec.df import DocumentFrequencies
 from ast2vec.id2vec import Id2Vec
-from ast2vec.nbow import NBOW
 from ast2vec.repo2.base import RepoTransformer, repos2_entry, repo2_entry
 from ast2vec.repo2.xbow import Repo2xBOW
+from modelforge.backends import create_backend
 
 
 class Repo2nBOW(Repo2xBOW):
@@ -67,18 +66,25 @@ class Repo2nBOWTransformer(RepoTransformer):
             backend = create_backend("gcs", "bucket=" + gcs_bucket)
         else:
             backend = None
-        self._id2vec = kwargs["id2vec"] = Id2Vec(id2vec or None, backend=backend)
-        self._df = kwargs["docfreq"] = DocumentFrequencies(docfreq or None, backend=backend)
+        self._id2vec = kwargs["id2vec"] = Id2Vec().load(id2vec or None, backend=backend)
+        self._df = kwargs["docfreq"] = DocumentFrequencies().load(docfreq or None, backend=backend)
         super(Repo2nBOWTransformer, self).__init__(**kwargs)
 
-    def result_to_tree(self, result):
+    def dependencies(self):
+        return self._df, self._id2vec
+
+    def result_to_model_kwargs(self, result, url_or_path: str):
         if not result:
             raise ValueError("Empty bag")
-        return {
-            "nbow": result,
-            "meta": generate_meta(self.WORKER_CLASS.MODEL_CLASS.NAME,
-                                  ast2vec.__version__, self._id2vec, self._df)
-        }
+        csr_data = []
+        csr_indices = []
+        csr_indptr = [0, len(result)]
+        for key, val in sorted(result.items()):
+            csr_data.append(val)
+            csr_indices.append(key)
+        return {"repos": [url_or_path],
+                "matrix": csr_matrix((csr_data, csr_indices, csr_indptr),
+                                     shape=(1, len(self._id2vec.tokens)))}
 
 
 def repo2nbow_entry(args):

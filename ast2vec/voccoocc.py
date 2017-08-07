@@ -1,5 +1,8 @@
-from modelforge.model import Model, assemble_sparse_matrix
+from modelforge import generate_meta
+from modelforge.model import Model, assemble_sparse_matrix, disassemble_sparse_matrix, write_model
 from modelforge.models import register_model
+
+import ast2vec
 
 
 @register_model
@@ -9,8 +12,11 @@ class VocabularyCooccurrences(Model):
     """
     NAME = "vocabulary_co-occurrences"
 
-    def load(self, tree):
-        self._matrix = assemble_sparse_matrix(tree["matrix"])
+    def construct(self, matrix):
+        self._matrix = matrix
+
+    def _load_tree(self, tree):
+        self.construct(matrix=assemble_sparse_matrix(tree["matrix"]))
 
     def dump(self):
         return """
@@ -29,3 +35,11 @@ Matrix: shape: %s non-zero: %d""" % (
         Returns the number of tokens in the model.
         """
         return self._matrix.shape[0]
+
+    def save(self, output, deps=None):
+        if not deps:
+            deps = tuple()
+        self._meta = generate_meta(self.NAME, ast2vec.__version__, *deps)
+        write_model(self._meta,
+                    {"matrix": disassemble_sparse_matrix(self.matrix)},
+                    output)
