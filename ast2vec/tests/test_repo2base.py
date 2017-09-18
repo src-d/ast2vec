@@ -9,7 +9,7 @@ from ast2vec.cloning import RepoCloner
 import ast2vec.tests as tests
 import ast2vec.repo2.base
 from ast2vec.repo2.base import BblfshFailedError, Repo2Base, RepoTransformer, \
-    ensure_bblfsh_is_running_noexc, DEFAULT_BBLFSH_ENDPOINT, resolve_bblfsh_endpoint, \
+    ensure_bblfsh_is_running_noexc, DEFAULT_BBLFSH_ENDPOINTS, resolve_bblfsh_endpoint, \
     DEFAULT_BBLFSH_TIMEOUT, resolve_bblfsh_timeout
 
 
@@ -164,7 +164,7 @@ class EnsureBblfshIsRunningNoexcTest(unittest.TestCase):
         environ_ = dict(os.environ)
         try:
             os.environ = {}
-            self.assertEqual(DEFAULT_BBLFSH_ENDPOINT, resolve_bblfsh_endpoint(None))
+            self.assertEqual(DEFAULT_BBLFSH_ENDPOINTS[0], resolve_bblfsh_endpoint(None))
             self.assertEqual("172.17.0.1:9432", resolve_bblfsh_endpoint("172.17.0.1:9432"))
             os.environ["BBLFSH_ENDPOINT"] = "192.168.0.1:9432"
             self.assertEqual("192.168.0.1:9432", resolve_bblfsh_endpoint(None))
