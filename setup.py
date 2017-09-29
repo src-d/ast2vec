@@ -32,7 +32,7 @@ setup(
                       "google-cloud-storage>=1.0,<2.0",
                       "python-dateutil",
                       "modelforge>=0.2.6-alpha",
-                      "bblfsh>=0.2.1,<1.0",
+                      "bblfsh==1.0.1",
                       "netifaces>=0.10.6"] + typing,
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
