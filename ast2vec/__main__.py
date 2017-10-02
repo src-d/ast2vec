@@ -104,8 +104,8 @@ def get_parser() -> argparse.ArgumentParser:
         "--organize-files", type=int, default=RepoTransformer.DEFAULT_ORGANIZE_FILES,
         help="Perform alphabetical directory indexing of provided level. Expand output path by "
              "subfolders using the first n characters of repository, for example for "
-             "\"--organize-files 2\" file ababa is saved to /a/ab/ababa, abcoasa is saved to "
-             "/a/bc/abcoasa, etc.")
+             "\"--organize-files 2\" file ababa is saved to /a/ab/ababa, bcoasa is saved to "
+             "/b/bc/bcoasa, etc.")
 
     disable_overwrite_arg = one_arg_parser(
         "--disable-overwrite", action="store_false", default=Repo2Base.DEFAULT_OVERWRITE_EXISTING,

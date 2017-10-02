@@ -13,7 +13,6 @@ import tempfile
 import threading
 from typing import Union
 from time import time
-import tempfile
 
 from google.protobuf.message import DecodeError
 from modelforge.logs import setup_logging
@@ -151,7 +150,7 @@ class Repo2Base(PickleableLogger):
     @overwrite_existing.setter
     def overwrite_existing(self, value: bool):
         if not isinstance(value, bool):
-            raise TypeError("overwrite_existing must be an boolean - got %s" % type(value))
+            raise TypeError("overwrite_existing must be a boolean - got %s" % type(value))
         self._overwrite_existing = value
 
     def convert_repository(self, url_or_path):
@@ -329,10 +328,10 @@ class RepoTransformer(Transformer):
         Base class for transformers from repository to WORKER_CLASS model
         :param log_level: Logging level of this instance.
         :param num_processes: Number of parallel processes to transform
-        :param organize_files: Perform alphabetical directory indexing of provided level. \
-            Expand output path by subfolders using the first n characters of repository, \
-            for example for "organize_files=2" file ababa is saved to /a/ab/ababa, abcoasa \
-            is saved to /a/bc/abcoasa, etc.
+        :param organize_files: Perform alphabetical directory indexing of provided level.
+            Expand output path by subfolders using the first n characters of repository,
+            for example for "organize_files=2" file ababa is saved to /a/ab/ababa, bcoasa
+            is saved to /b/bc/bcoasa, etc.
         :param args: arguments for WORKER_CLASS model initialization
         """
         super().__init__(log_level=log_level)
@@ -370,10 +369,10 @@ class RepoTransformer(Transformer):
         :param args: :class:`dict`-like container with the arguments to cls().
         :param outdir: The output directory.
         :param queue: :class:`multiprocessing.Queue` to report the status.
-        :param organize_files: Perform alphabetical directory indexing of provided level. \
-            Expand output path by subfolders using the first n characters of repository, \
-            for example for "organize_files=2" file ababa is saved to /a/ab/ababa, abcoasa \
-            is saved to /a/bc/abcoasa, etc.
+        :param organize_files: Perform alphabetical directory indexing of provided level.
+            Expand output path by subfolders using the first n characters of repository,
+            for example for "organize_files=2" file ababa is saved to /a/ab/ababa, bcoasa
+            is saved to /b/bc/bcoasa, etc.
         :return: The child process' exit code.
         """
         if "log_level" in args:
@@ -403,10 +402,10 @@ class RepoTransformer(Transformer):
 
         :param repo: name of repository
         :param output: output directory
-        :param organize_files: Perform alphabetical directory indexing of provided level. \
-            Expand output path by subfolders using the first n characters of repository, \
-            for example for "organize_files=2" file ababa is saved to /a/ab/ababa, abcoasa \
-            is saved to /a/bc/abcoasa, etc.
+        :param organize_files: Perform alphabetical directory indexing of provided level.
+            Expand output path by subfolders using the first n characters of repository,
+            for example for "organize_files=2" file ababa is saved to /a/ab/ababa, bcoasa
+            is saved to /b/bc/bcoasa, etc.
         :return: converted repository name (removed "https://", etc.)
         """
         if os.path.exists(repo):
@@ -417,6 +416,11 @@ class RepoTransformer(Transformer):
             for prefix in prefixes:
                 if repo.startswith(prefix):
                     repo_name = repo_name[len(prefix):]
+                    break
+            sites = ["bitbucket.org/", "github.com/"]
+            for site in sites:
+                if repo_name.startswith(site):
+                    repo_name = repo_name[len(site):]
                     break
             postfixes = ["\n", "/", "\\", ".git"]
             for postfix in postfixes:
@@ -480,11 +484,11 @@ class RepoTransformer(Transformer):
         """
         Converts repositories to models and saves them to the output directory.
 
-        :param repos: "repos" is the list of repository URLs or paths or \
+        :param repos: "repos" is the list of repository URLs or paths or
                   files with repository URLS or paths.
-        :param output: "output" is the output directory where to store the \
+        :param output: "output" is the output directory where to store the
                         results.
-        :param num_processes: number of processes to use, if negative - use all \
+        :param num_processes: number of processes to use, if negative - use all
                CPUs.
         :return: None
         """
@@ -658,8 +662,8 @@ def repo2_entry(args, payload_class):
     """
     Invokes payload_class(\*\*args).process_repo() on the specified repository.
 
-    :param args: :class:`argparse.Namespace` with "repository" and "output". \
-                 "repository" is a file system path or a URL. "output" is the path \
+    :param args: :class:`argparse.Namespace` with "repository" and "output".
+                 "repository" is a file system path or a URL. "output" is the path
                  to the file with the resulting model.
     :param payload_class: :class:`Transformer` inheritor to call.
     :return: None
@@ -673,9 +677,9 @@ def repos2_entry(args, payload_class):
     """
     Invokes payload_class(\*\*args).transform() for every repository in parallel processes.
 
-    :param args: :class:`argparse.Namespace` with "input" and "output". \
-                 "input" is the list of repository URLs or paths or files \
-                 with repository URLS or paths. "output" is the output \
+    :param args: :class:`argparse.Namespace` with "input" and "output".
+                 "input" is the list of repository URLs or paths or files
+                 with repository URLS or paths. "output" is the output
                  directory where to store the results.
     :param payload_class: :class:`Transformer` inheritor to call.
     :return: None
