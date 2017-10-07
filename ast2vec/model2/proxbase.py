@@ -1,6 +1,5 @@
 from collections import defaultdict, deque
 from itertools import permutations, product
-import os
 from typing import Dict, Tuple
 
 import numpy

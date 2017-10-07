@@ -1,6 +1,5 @@
 from typing import Dict, Tuple
 
-from ast2vec.coocc import Cooccurrences
 from ast2vec.model2.proxbase import ProxBase
 
 MATRIX_TYPES = dict()
