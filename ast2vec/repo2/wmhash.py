@@ -1,3 +1,4 @@
+import copy
 import itertools
 
 import numpy
@@ -86,6 +87,17 @@ class Repo2DocFreq(Repo2Base):
         for i, extractor in self.extractors:
             for k in extractor.inspect():
                 yield (i, k), 1
+
+    def prepare_process_uast(self):
+        NDOCS_KEY = copy.deepcopy(self.NDOCS_KEY)
+        extractors = copy.deepcopy(self.extractors)
+
+        def process_uast(uast):
+            yield NDOCS_KEY, 1
+            for i, extractor in enumerate(extractors):
+                for k in extractor().inspect(uast):
+                    yield (i, k), 1
+        return process_uast
 
     def __call__(self, processed):
         reduced = processed.countByKey()
