@@ -33,7 +33,9 @@ class Repo2Base(PickleableLogger):
             lang_filter |= classified.lang == lang
         filtered_by_lang = classified.filter(lang_filter)
         uasts = filtered_by_lang.extract_uasts()
-        processed = uasts.rdd.flatMap(self.process_uast)
+
+        process_uast = self.prepare_process_uast()
+        processed = uasts.rdd.flatMap(process_uast)
         self.finalizer(processed)
 
     def process_uast(self, uast):
