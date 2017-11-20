@@ -26,7 +26,7 @@ setup(
               "github", "swivel", "nbow", "bblfsh", "babelfish"],
     install_requires=["PyStemmer>=1.3,<2.0",
                       "numpy>=1.12,<2.0",
-                      "scipy>=0.17,<1.0",
+                      "scipy<2.0,>=0.17",
                       "clint>=0.5.0",
                       "asdf>=1.2,<2.0",
                       "google-cloud-storage>=1.0,<2.0",
