@@ -31,7 +31,7 @@ setup(
                       "asdf>=1.2,<2.0",
                       "google-cloud-storage>=1.0,<2.0",
                       "python-dateutil",
-                      "modelforge>=0.2.6-alpha,<0.4.0-alpha",
+                      "modelforge>=0.2.6.pre.alpha,<0.6.0",
                       "bblfsh>=2.0,<3.0",
                       "netifaces>=0.10.6"] + typing,
     extras_require={
