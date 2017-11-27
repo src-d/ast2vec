@@ -9,6 +9,7 @@ from sourced.ml.id_embedding import preprocess as preprocess_id2vec, run_swivel,
     postprocess as postprocess_id2vec, swivel
 from sourced.ml.topics import bigartm2asdf_entry
 from sourced.ml.vw_dataset import bow2vw_entry
+from sourced.ml.repo2.coocc import repos2coocc_entry
 
 from modelforge.logs import setup_logging
 from sourced.ml.dump import dump_model
@@ -35,6 +36,25 @@ def one_arg_parser(*args, **kwargs) -> argparse.ArgumentParser:
     arg_parser = argparse.ArgumentParser(add_help=False)
     arg_parser.add_argument(*args, **kwargs)
     return arg_parser
+
+
+def add_spark_args(my_parser):
+    my_parser.add_argument(
+        "-s", "--spark", default="local[*]", help="Spark's master address.")
+    my_parser.add_argument(
+        "--config", nargs="+", default=[], help="Spark configuration (key=value).")
+    my_parser.add_argument(
+        "--package", nargs="+", default=[], help="Additional Spark package.")
+    my_parser.add_argument(
+        "--spark-local-dir", default="/tmp/spark", help="Spark local directory.")
+
+
+def add_engine_args(my_parser):
+    add_spark_args(my_parser)
+    my_parser.add_argument(
+        "--bblfsh", default="localhost", help="Babelfish server's address.")
+    my_parser.add_argument(
+        "--engine", default="0.1.10", help="source{d} engine version.")
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -70,6 +90,30 @@ def get_parser() -> argparse.ArgumentParser:
     # Create and construct subparsers
 
     subparsers = parser.add_subparsers(help="Commands", dest="command")
+
+    repo2coocc_parser = subparsers.add_parser(
+        "repo2coocc", help="Produce the co-occurrence matrix from a Git repository.",
+        formatter_class=ArgumentDefaultsHelpFormatterNoNone,
+        parents=[])
+    add_engine_args(repo2coocc_parser)
+
+    repo2coocc_parser.add_argument("-r", "--repositories", required=True,
+                                   help="The path to the repositories.")
+
+    repo2coocc_parser.add_argument(
+        "--min-docfreq", default=1, type=int,
+        help="The minimum document frequency of each element.")
+
+    repo2coocc_parser.add_argument(
+        "-l", "--languages", required=True, nargs="+", choices=("Java", "Python"),
+        help="The programming languages to analyse.")
+    repo2coocc_parser.add_argument(
+        "--persist", default=None, help="Persistence type (StorageClass.*).")
+    repo2coocc_parser.add_argument(
+        "-o", "--output", required=True, help="Path to the output file.")
+
+    repo2coocc_parser.set_defaults(handler=repos2coocc_entry)
+
     preproc_parser = subparsers.add_parser(
         "id2vec_preproc", help="Convert co-occurrence CSR matrices to Swivel dataset.",
         formatter_class=ArgumentDefaultsHelpFormatterNoNone,

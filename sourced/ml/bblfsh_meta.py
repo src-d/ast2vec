@@ -12,6 +12,13 @@ with lazy_grpc.masquerade():
 
     _ROLE = importlib.import_module(
         "bblfsh.gopkg.in.bblfsh.sdk.%s.uast.generated_pb2" % VERSION)._ROLE
+
+    class Roles:
+        """
+        Contain babelfish roles ids.
+        """
+        pass
+
     for desc in _ROLE.values:
-        globals()[desc.name] = desc.index
+        setattr(Roles, desc.name, desc.index)
     del _ROLE
