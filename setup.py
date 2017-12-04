@@ -28,7 +28,7 @@ setup(
                       "modelforge>=0.2.6-alpha,<0.4.0-alpha",
                       "bblfsh>=2.0,<3.0",
                       "grpcio==1.4.0",
-                      "grpcio-tools==1.4.0",
+                      "grpcio-tools==1.7.0",
                       "netifaces>=0.10.6"] + typing,
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
