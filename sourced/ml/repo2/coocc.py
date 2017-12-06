@@ -43,6 +43,7 @@ class CooccConstructor(Transformer):
         self.prune_size = prune_size
 
     def _flatten_children(self, root):
+        # TODO(zurk): refactor using `uast_ids_to_bag.py`
         ids = []
         stack = list(root.children)
         for node in stack:
@@ -96,7 +97,7 @@ class CooccConstructor(Transformer):
 
 def repos2coocc_entry(args):
     log = logging.getLogger("repos2cooc")
-    engine = create_engine("repos2cooc-%s" % uuid4(), args.repositories, args)
+    engine = create_engine("repos2cooc-%s" % uuid4(), **args.__dict__)
 
     pipeline = Engine(engine, explain=args.explain)
     pipeline = pipeline.link(HeadFiles())

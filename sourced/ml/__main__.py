@@ -4,6 +4,7 @@ import os
 import sys
 
 from sourced.ml.bigartm import install_bigartm
+from sourced.ml.engine import SparkDefault, EngineDefault
 from sourced.ml.id2vec import projector_entry
 from sourced.ml.id_embedding import preprocess as preprocess_id2vec, run_swivel, \
     postprocess as postprocess_id2vec, swivel
@@ -40,9 +41,11 @@ def one_arg_parser(*args, **kwargs) -> argparse.ArgumentParser:
 
 def add_spark_args(my_parser):
     my_parser.add_argument(
-        "-s", "--spark", default="local[*]", help="Spark's master address.")
+        "-s", "--spark", default=SparkDefault.MASTER_ADDRESS,
+        help="Spark's master address.")
     my_parser.add_argument(
-        "--config", nargs="+", default=[], help="Spark configuration (key=value).")
+        "--config", nargs="+", default=SparkDefault.CONFIG,
+        help="Spark configuration (key=value).")
     my_parser.add_argument(
         "-m", "--memory",
         help="Handy memory config for spark. -m 4,10,2 is equivalent to "
@@ -51,9 +54,11 @@ def add_spark_args(my_parser):
              "--config spark.driver.maxResultSize=2G."
              "Numbers are floats separated by commas.")
     my_parser.add_argument(
-        "--package", nargs="+", default=[], help="Additional Spark package.")
+        "--package", nargs="+", default=SparkDefault.PACKAGE,
+        help="Additional Spark package.")
     my_parser.add_argument(
-        "--spark-local-dir", default="/tmp/spark", help="Spark local directory.")
+        "--spark-local-dir", default=SparkDefault.LOCAL_DIR,
+        help="Spark local directory.")
     persistences = ("DISK_ONLY", "DISK_ONLY_2", "MEMORY_ONLY", "MEMORY_ONLY_2",
                     "MEMORY_AND_DISK", "MEMORY_AND_DISK_2", "OFF_HEAP")
     my_parser.add_argument(
@@ -64,9 +69,11 @@ def add_spark_args(my_parser):
 def add_engine_args(my_parser):
     add_spark_args(my_parser)
     my_parser.add_argument(
-        "--bblfsh", default="localhost", help="Babelfish server's address.")
+        "--bblfsh", default=EngineDefault.BBLFSH,
+        help="Babelfish server's address.")
     my_parser.add_argument(
-        "--engine", default="0.2.0", help="source{d} engine version.")
+        "--engine", default=EngineDefault.VERSION,
+        help="source{d} engine version.")
     my_parser.add_argument("--explain", action="store_true",
                            help="Print the PySpark execution plans.")
 
