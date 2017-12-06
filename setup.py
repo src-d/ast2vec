@@ -29,9 +29,8 @@ setup(
                       "bblfsh>-2.2.1,<3.0",
                       "modelforge>=0.5.0-alpha",
                       "parquet==1.2",
-                      "numpy>=1.12,<2.0",
                       "pyspark==2.2.0",
-                      "sourced-engine == 0.1.10"] + typing,
+                      "sourced-engine==0.2.0"] + typing,
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0,<2.0"],

@@ -5,4 +5,4 @@ modelforge>=0.5.0-alpha
 parquet==1.2
 numpy>=1.12,<2.0
 pyspark==2.2.0
-sourced-engine==0.1.10
+sourced-engine==0.2.0,<0.3.0

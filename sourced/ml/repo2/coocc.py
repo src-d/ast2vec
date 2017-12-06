@@ -8,7 +8,7 @@ from pyspark.sql.functions import size, col
 from modelforge.meta import generate_meta
 from modelforge.model import merge_strings, write_model
 from sourced.ml.engine import create_engine, get_tokens
-from sourced.ml.repo2.base import UastExtractor, Transformer, Cacher, UastDeserializer
+from sourced.ml.repo2.base import UastExtractor, Transformer, Cacher, UastDeserializer, Engine, HeadFiles
 from sourced.ml.repo2.token_map import TokenMapTransformer
 from sourced.ml.token_parser import TokenParser
 
@@ -97,13 +97,16 @@ class UASTCooccTransformer(Transformer):
                 # Do not have token1 or token2 in the token2index map
                 pass
 
+
 def repos2coocc_entry(args):
     log = logging.getLogger("repos2cooc")
     if not args.config:
         args.config = []
     engine = create_engine("repos2cooc-%s" % uuid4(), args.repositories, args)
 
-    pipeline = UastExtractor(engine, languages=args.languages)
+    pipeline = Engine(engine, explain=args.explain)
+    pipeline = pipeline.link(HeadFiles())
+    pipeline = pipeline.link(UastExtractor(languages=args.languages))
     if args.persist is not None:
         uasts = pipeline.link(Cacher(args.persist))
     else:
