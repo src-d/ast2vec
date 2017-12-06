@@ -1,23 +1,21 @@
+import itertools
 import logging
-import os
-from operator import add
+import operator
+from scipy import sparse
 from uuid import uuid4
-from pyspark.sql import column
-from pyspark.sql.functions import size, col
 
 from modelforge.meta import generate_meta
 from modelforge.model import merge_strings, write_model
-from sourced.ml.engine import create_engine, get_tokens
-from sourced.ml.repo2.base import UastExtractor, Transformer, Cacher, UastDeserializer, Engine, HeadFiles
-from sourced.ml.repo2.token_map import TokenMapTransformer
+from sourced.ml.coocc import Cooccurrences
+from sourced.ml.engine import create_engine
+from sourced.ml.repo2.base import UastExtractor, Transformer, Cacher, UastDeserializer, \
+    Engine, HeadFiles
+from sourced.ml.repo2.token_mapper import TokenMapper
 from sourced.ml.token_parser import TokenParser
-
-import itertools
-
-from sourced.ml.bblfsh_meta import Roles, Node
+from sourced.ml.bblfsh_meta import Roles
 
 
-class SaveASDFCooccModel(Transformer):
+class CooccModelSaver(Transformer):
     def __init__(self, output, tokens_list, **kwargs):
         super().__init__(**kwargs)
         self.tokens_list = tokens_list
@@ -28,18 +26,14 @@ class SaveASDFCooccModel(Transformer):
         rows = sparce_matrix.take(matrix_count)
 
         mat_row, mat_col, mat_weights = zip(*rows)
+        tokens_num = len(self.tokens_list)
+        matrix = sparse.coo_matrix((mat_weights, (mat_row, mat_col)),
+                                   shape=(tokens_num, tokens_num))
 
-        write_model(generate_meta("co-occurrences", (1, 0, 0)),
-                    {"tokens": merge_strings(self.tokens_list),
-                     "matrix": {
-                         "shape": (len(self.tokens_list), len(self.tokens_list)),
-                         "format": "coo",
-                         "data": (mat_weights, (mat_row, mat_col))}
-                     },
-                    self.output)
+        Cooccurrences().construct(self.tokens_list, matrix).save(self.output)
 
 
-class UASTCooccTransformer(Transformer):
+class CooccConstructor(Transformer):
     def __init__(self, token2index, token_parser, prune_size=1, **kwargs):
         super().__init__(**kwargs)
         self.token2index = token2index
@@ -72,8 +66,10 @@ class UASTCooccTransformer(Transformer):
                 tokens = []
                 for ch in children:
                     tokens.extend(self.token_parser(ch.token))
-                if (node.token.strip() is not None and node.token.strip() != "" and
-                            Roles.IDENTIFIER in node.roles and Roles.QUALIFIED not in node.roles):
+                token = node.token.strip()
+                if node.token.strip() != "" and \
+                        Roles.IDENTIFIER in node.roles and \
+                        Roles.QUALIFIED not in node.roles:
                     tokens.extend(self.token_parser(node.token))
                 for pair in itertools.permutations(tokens, 2):
                     yield pair
@@ -85,7 +81,7 @@ class UASTCooccTransformer(Transformer):
 
     def __call__(self, uasts):
         sparce_matrix = uasts.flatMap(self._process_row)\
-            .reduceByKey(add)\
+            .reduceByKey(operator.add)\
             .map(lambda row: (row[0][0], row[0][1], row[1]))
         return sparce_matrix
 
@@ -100,35 +96,17 @@ class UASTCooccTransformer(Transformer):
 
 def repos2coocc_entry(args):
     log = logging.getLogger("repos2cooc")
-    if not args.config:
-        args.config = []
     engine = create_engine("repos2cooc-%s" % uuid4(), args.repositories, args)
 
     pipeline = Engine(engine, explain=args.explain)
     pipeline = pipeline.link(HeadFiles())
     pipeline = pipeline.link(UastExtractor(languages=args.languages))
-    if args.persist is not None:
-        uasts = pipeline.link(Cacher(args.persist))
-    else:
-        uasts = pipeline
+    pipeline = Cacher.maybe(pipeline, args.persist)
 
     token_parser = TokenParser()
-    token_mapping_transformer = TokenMapTransformer(token_parser)
-    tokens, tokens2index = uasts.link(token_mapping_transformer).execute()
+    tokens, tokens2index = pipeline.link(TokenMapper(token_parser)).execute()
 
-    uasts = uasts.link(UastDeserializer())
-    tokens_matrix = uasts.link(UASTCooccTransformer(tokens2index, token_parser))
-    save_model = tokens_matrix.link(SaveASDFCooccModel(args.output, tokens))
+    uasts = pipeline.link(UastDeserializer())
+    tokens_matrix = uasts.link(CooccConstructor(tokens2index, token_parser))
+    save_model = tokens_matrix.link(CooccModelSaver(args.output, tokens))
     save_model.execute()
-
-    # from sourced.ml.repo2 import wmhash
-    # extractors = [wmhash.__extractors__[s](
-    #     args.min_docfreq, **wmhash.__extractors__[s].get_kwargs_fromcmdline(args))
-    #     for s in wmhash.__extractors__]
-    # tokens_matrix = uasts.link(wmhash.Repo2DocFreq(extractors)).execute()
-    # tokens_matrix.explode()
-
-    #tokens_matrix = uasts.link(UASTCooccTransformer(token_mapping, token_parser))
-    #tokens_matrix.execute()
-
-    pass

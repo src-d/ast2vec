@@ -44,9 +44,21 @@ def add_spark_args(my_parser):
     my_parser.add_argument(
         "--config", nargs="+", default=[], help="Spark configuration (key=value).")
     my_parser.add_argument(
+        "-m", "--memory",
+        help="Handy memory config for spark. -m 4,10,2 is equivalent to "
+             "--config spark.executor.memory=4G "
+             "--config spark.driver.memory=10G "
+             "--config spark.driver.maxResultSize=2G."
+             "Numbers are floats separated by commas.")
+    my_parser.add_argument(
         "--package", nargs="+", default=[], help="Additional Spark package.")
     my_parser.add_argument(
         "--spark-local-dir", default="/tmp/spark", help="Spark local directory.")
+    persistences = ("DISK_ONLY", "DISK_ONLY_2", "MEMORY_ONLY", "MEMORY_ONLY_2",
+                    "MEMORY_AND_DISK", "MEMORY_AND_DISK_2", "OFF_HEAP")
+    my_parser.add_argument(
+        "--persist", default=None, choices=persistences,
+        help="Spark persistence type (StorageLevel.*).")
 
 
 def add_engine_args(my_parser):
@@ -57,8 +69,7 @@ def add_engine_args(my_parser):
         "--engine", default="0.2.0", help="source{d} engine version.")
     my_parser.add_argument("--explain", action="store_true",
                            help="Print the PySpark execution plans.")
-    my_parser.add_argument("--pause", action="store_true",
-                           help="Do not terminate in the end.")
+
 
 def get_parser() -> argparse.ArgumentParser:
     """
@@ -96,24 +107,21 @@ def get_parser() -> argparse.ArgumentParser:
 
     repo2coocc_parser = subparsers.add_parser(
         "repo2coocc", help="Produce the co-occurrence matrix from a Git repository.",
-        formatter_class=ArgumentDefaultsHelpFormatterNoNone,
-        parents=[])
+        formatter_class=ArgumentDefaultsHelpFormatterNoNone)
     add_engine_args(repo2coocc_parser)
 
-    repo2coocc_parser.add_argument("-r", "--repositories", required=True,
-                                   help="The path to the repositories.")
-
+    repo2coocc_parser.add_argument(
+        "-r", "--repositories", required=True,
+        help="The path to the repositories.")
     repo2coocc_parser.add_argument(
         "--min-docfreq", default=1, type=int,
         help="The minimum document frequency of each element.")
-
     repo2coocc_parser.add_argument(
         "-l", "--languages", required=True, nargs="+", choices=("Java", "Python"),
         help="The programming languages to analyse.")
     repo2coocc_parser.add_argument(
-        "--persist", default=None, help="Persistence type (StorageClass.*).")
-    repo2coocc_parser.add_argument(
-        "-o", "--output", required=True, help="Path to the output file.")
+        "-o", "--output", required=True,
+        help="Path to the output file.")
 
     repo2coocc_parser.set_defaults(handler=repos2coocc_entry)
 

@@ -5,7 +5,6 @@ os.environ["PYSPARK_PYTHON"] = sys.executable
 
 from pyspark.sql import SparkSession  # nopep8
 from sourced.engine import Engine  # nopep8
-from pyspark.sql.functions import size, col  # nopep8
 
 
 def create_spark(session_name, kwargs):
@@ -27,20 +26,13 @@ def create_engine(session_name, repositories, kwargs):
     # TODO(vmarkovtsev): figure out why is this option needed
     kwargs.config.append("spark.tech.sourced.engine.cleanup.skip=true")
     kwargs.package.append("tech.sourced:engine:" + kwargs.engine)
+    if kwargs.memory:
+        memory = kwargs.memory.split(",")
+        kwargs.config.append("spark.executor.memory=%sG" + memory[0])
+        kwargs.config.append("spark.driver.memory=%sG" + memory[1])
+        kwargs.config.append("spark.driver.maxResultSize=%sG" + memory[2])
     session = create_spark(session_name, kwargs)
     log = logging.getLogger("engine")
     log.info("Initializing on %s", repositories)
     engine = Engine(session, repositories)
     return engine
-
-
-def get_tokens(uasts):
-    """
-    Get all tokens from uasts.
-
-    :param uasts: UASTsDataFrame from sourced.engine
-    :return: DataFrame with new tokens column
-    """
-    return uasts.query_uast('//*[@roleIdentifier and not(@roleIncomplete)]')\
-        .extract_tokens()\
-        .where(size(col("tokens")) != 0)

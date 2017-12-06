@@ -160,6 +160,13 @@ class Cacher(Transformer):
             self.trace = self.path()
         return self.head
 
+    @staticmethod
+    def maybe(pipeline, persistence):
+        if persistence is not None:
+            return pipeline.link(Cacher(persistence))
+        else:
+            return pipeline
+
 
 class Engine(Transformer):
     def __init__(self, engine, **kwargs):
