@@ -9,7 +9,7 @@ from io import StringIO
 import modelforge.gcs_backend as gcs_backend
 import sourced.ml.tests.models as paths
 from sourced.ml.tests.fake_requests import FakeRequests
-from sourced.ml.utils.dump import dump_model
+from sourced.ml.utils import dump_model
 
 
 @contextmanager

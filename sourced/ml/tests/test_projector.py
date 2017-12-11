@@ -7,10 +7,10 @@ import time
 import unittest
 
 import requests
-from sourced.ml.projector import CORSWebServer, web_server, wait, present_embeddings
 
 from modelforge.logs import setup_logging
 from sourced.ml.tests.test_dump import captured_output
+from sourced.ml.utils.projector import CORSWebServer, web_server, wait, present_embeddings
 
 
 class ProjectorTests(unittest.TestCase):

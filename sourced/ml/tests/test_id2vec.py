@@ -3,12 +3,12 @@ import logging
 import os
 import unittest
 
-import sourced.ml.projector as projector
-import sourced.ml.tests.models as paths
 import numpy
+import sourced.ml.projector as projector
 
-from sourced.ml.projector_entry import projector_entry
+import sourced.ml.tests.models as paths
 from sourced.ml.models import Id2Vec
+from sourced.ml.utils import projector_entry
 
 
 class Id2VecTests(unittest.TestCase):

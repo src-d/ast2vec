@@ -4,7 +4,7 @@ from typing import Union
 from pyspark import StorageLevel
 from pyspark.sql.types import Row
 
-from sourced.ml.utils.pickleable_logger import PickleableLogger  # nopep8
+from sourced.ml.utils import PickleableLogger  # nopep8
 
 
 class Transformer(PickleableLogger):

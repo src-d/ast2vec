@@ -47,7 +47,7 @@ def projector_entry(args):
     if freqs is not None:
         labels.append("docfreq")
         tokens = list(zip(tokens, (str(i) for i in freqs)))
-    import sourced.ml.projector as projector
+    import sourced.ml.utils.projector as projector
     projector.present_embeddings(args.output, not args.no_browser, labels, tokens, embeddings)
     if not args.no_browser:
         projector.wait()
