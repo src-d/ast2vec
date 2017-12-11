@@ -4,7 +4,7 @@ from typing import Union
 from modelforge import Model, split_strings, assemble_sparse_matrix, \
     merge_strings, disassemble_sparse_matrix, register_model
 
-from sourced.ml.id2vec import Id2Vec
+from sourced.ml.models import Id2Vec
 
 
 class BOWBase(Model):

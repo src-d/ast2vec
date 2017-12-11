@@ -2,9 +2,7 @@ import argparse
 import logging
 
 from modelforge.progress_bar import progress_bar
-
-from sourced.ml.id2vec import Id2Vec
-from sourced.ml.bow import BOW, NBOW
+from sourced.ml.models import BOW, NBOW
 
 
 def convert_bow_to_vw(bow: BOW, output: str):

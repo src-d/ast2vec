@@ -7,7 +7,8 @@ import sourced.ml.projector as projector
 import sourced.ml.tests.models as paths
 import numpy
 
-from sourced.ml.id2vec import Id2Vec, projector_entry
+from sourced.ml.projector_entry import projector_entry
+from sourced.ml.models import Id2Vec
 
 
 class Id2VecTests(unittest.TestCase):

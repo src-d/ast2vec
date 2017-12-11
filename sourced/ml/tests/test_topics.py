@@ -3,7 +3,8 @@ import os
 import tempfile
 import unittest
 
-from sourced.ml.topics import Topics, bigartm2asdf_entry
+from sourced.ml.bigartm import bigartm2asdf_entry
+from sourced.ml.models import Topics
 import sourced.ml.tests.models as paths
 
 

@@ -7,7 +7,8 @@ import unittest
 import asdf
 import numpy
 import tensorflow as tf
-from sourced.ml import DocumentFrequencies, swivel, Id2Vec
+from sourced.ml import swivel
+from sourced.ml.models import DocumentFrequencies, Id2Vec
 from sourced.ml.id_embedding import preprocess, run_swivel, postprocess, SwivelTransformer, \
     PostprocessTransformer, PreprocessTransformer
 from scipy.sparse import coo_matrix

@@ -5,16 +5,14 @@ import sys
 from argparse import Namespace
 from collections import defaultdict
 
-from modelforge.progress_bar import progress_bar
 import numpy
-from scipy.sparse import csr_matrix
 import tensorflow as tf
+from scipy.sparse import csr_matrix
 
-from sourced.ml.coocc import Cooccurrences
-from sourced.ml.df import DocumentFrequencies
 import sourced.ml.swivel as swivel
+from modelforge.progress_bar import progress_bar
+from sourced.ml.models import Cooccurrences, DocumentFrequencies, Id2Vec
 from sourced.ml.token_parser import TokenParser
-from sourced.ml.id2vec import Id2Vec
 
 
 class Transformer:

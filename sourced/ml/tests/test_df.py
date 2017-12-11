@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from sourced.ml import DocumentFrequencies
+from sourced.ml.models import DocumentFrequencies
 import sourced.ml.tests.models as paths
 
 

@@ -1,22 +1,21 @@
 import codecs
-from collections import namedtuple
-from glob import glob
 import inspect
 import os
+from collections import namedtuple
+from glob import glob
 from typing import Iterable, Dict
 
-from modelforge import merge_strings, register_model
 import numpy
 import parquet
 from pyspark.sql.types import Row
 from scipy.sparse import csr_matrix
 
-from sourced.ml.df import DocumentFrequencies
+from modelforge import merge_strings, register_model
+from sourced.ml.models import DocumentFrequencies
 from sourced.ml.pickleable_logger import PickleableLogger
-from sourced.ml.repo2.base import Transformer
+from sourced.ml.transformers.base import Transformer
 from sourced.ml.uast_ids_to_bag import UastIds2Bag
 from sourced.ml.uast_struct_to_bag import UastRandomWalk2Bag, UastSeq2Bag
-
 
 __extractors__ = {}
 

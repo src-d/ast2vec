@@ -4,10 +4,10 @@ import os
 import tempfile
 import unittest
 
-from sourced.ml.bow import NBOW, BOW
-import sourced.ml.vw_dataset
-from sourced.ml.vw_dataset import convert_bow_to_vw, bow2vw_entry
 import sourced.ml.tests.models as paths
+import sourced.ml.vw_dataset
+from sourced.ml.models import NBOW, BOW
+from sourced.ml.vw_dataset import convert_bow_to_vw, bow2vw_entry
 
 
 class Bow2vwTests(unittest.TestCase):
