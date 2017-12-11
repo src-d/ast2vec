@@ -9,7 +9,7 @@ from sourced.ml.algorithms.id_embedding import preprocess as preprocess_id2vec, 
 from sourced.ml.bigartm import install_bigartm, bigartm2asdf_entry
 from sourced.ml.projector_entry import projector_entry
 from sourced.ml.utils.dump import dump_model
-from sourced.ml.vw_dataset import bow2vw_entry
+from sourced.ml.models.bow import bow2vw_entry
 
 
 class ArgumentDefaultsHelpFormatterNoNone(argparse.ArgumentDefaultsHelpFormatter):
