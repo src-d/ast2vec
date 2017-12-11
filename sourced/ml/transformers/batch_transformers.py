@@ -7,8 +7,8 @@ import parquet
 from pyspark.sql.types import Row
 from scipy.sparse import csr_matrix
 
-from sourced.ml.models.ordered_df import OrderedDocumentFrequencies
-from sourced.ml.transformers.transformer import Transformer
+from sourced.ml.models import OrderedDocumentFrequencies
+from sourced.ml.transformers import Transformer
 from sourced.ml.utils import PickleableLogger
 
 

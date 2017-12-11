@@ -1,5 +1,5 @@
 from sourced.ml.algorithms.uast_ids_to_bag import UastIds2Bag
-from sourced.ml.extractors import BagsExtractor,register_extractor
+from sourced.ml.extractors import BagsExtractor, register_extractor
 
 
 @register_extractor

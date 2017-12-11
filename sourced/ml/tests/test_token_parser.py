@@ -1,7 +1,7 @@
 import pickle
 import unittest
 
-from sourced.ml.algorithms.token_parser import TokenParser, NoTokenParser
+from sourced.ml.algorithms import TokenParser, NoTokenParser
 
 
 class TokenParserTests(unittest.TestCase):

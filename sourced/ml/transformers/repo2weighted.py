@@ -1,4 +1,4 @@
-from sourced.ml.transformers.transformer import Transformer
+from sourced.ml.transformers import Transformer
 
 
 class Repo2WeightedSet(Transformer):

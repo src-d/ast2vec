@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from sourced.ml.algorithms.token_parser import TokenParser
+from sourced.ml.algorithms import TokenParser
 
 
 class FakeVocabulary:

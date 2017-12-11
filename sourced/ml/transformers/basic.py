@@ -2,7 +2,7 @@ from typing import Union
 
 from pyspark import StorageLevel, Row
 
-from sourced.ml.transformers.transformer import Transformer
+from sourced.ml.transformers import Transformer
 
 
 class Collector(Transformer):
