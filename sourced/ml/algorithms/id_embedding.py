@@ -8,11 +8,11 @@ from collections import defaultdict
 import numpy
 import tensorflow as tf
 from scipy.sparse import csr_matrix
+from sourced.ml.algorithms import TokenParser
 
-import sourced.ml.swivel as swivel
+import sourced.ml.algorithms.swivel as swivel
 from modelforge.progress_bar import progress_bar
 from sourced.ml.models import Cooccurrences, DocumentFrequencies, Id2Vec
-from sourced.ml.token_parser import TokenParser
 
 
 class Transformer:

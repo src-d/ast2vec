@@ -3,14 +3,13 @@ import logging
 import os
 import sys
 
+from modelforge.logs import setup_logging
+from sourced.ml.algorithms.id_embedding import preprocess as preprocess_id2vec, run_swivel, \
+    postprocess as postprocess_id2vec, swivel
 from sourced.ml.bigartm import install_bigartm, bigartm2asdf_entry
 from sourced.ml.projector_entry import projector_entry
-from sourced.ml.id_embedding import preprocess as preprocess_id2vec, run_swivel, \
-    postprocess as postprocess_id2vec, swivel
+from sourced.ml.utils.dump import dump_model
 from sourced.ml.vw_dataset import bow2vw_entry
-
-from modelforge.logs import setup_logging
-from sourced.ml.dump import dump_model
 
 
 class ArgumentDefaultsHelpFormatterNoNone(argparse.ArgumentDefaultsHelpFormatter):

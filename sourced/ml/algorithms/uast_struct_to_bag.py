@@ -1,7 +1,7 @@
-from collections import defaultdict, deque
 import random
+from collections import defaultdict, deque
 
-from sourced.ml.uast_ids_to_bag import FakeVocabulary
+from sourced.ml.algorithms.uast_ids_to_bag import FakeVocabulary
 
 
 class UastStructure2BagBase:
