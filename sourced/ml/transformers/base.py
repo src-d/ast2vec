@@ -226,10 +226,8 @@ class ParquetLoader(Transformer):
 class UastDeserializer(Transformer):
     def __setstate__(self, state):
         super().__setstate__(state)
-        from bblfsh.sdkversion import VERSION
-        self.parse_uast = importlib.import_module(
-            "bblfsh.gopkg.in.bblfsh.sdk.%s.uast.generated_pb2" % VERSION
-        ).Node.FromString
+        from bblfsh import Node
+        self.parse_uast = Node.FromString
 
     def __call__(self, rows):
         return rows.rdd.flatMap(self.deserialize_uast)
