@@ -1,4 +1,5 @@
 # sourced.ml [![Build Status](https://travis-ci.org/src-d/ml.svg)](https://travis-ci.org/src-d/ml) [![codecov](https://codecov.io/github/src-d/ml/coverage.svg?branch=develop)](https://codecov.io/gh/src-d/ml) [![PyPI](https://img.shields.io/pypi/v/ast2vec.svg)](https://pypi.python.org/pypi/ast2vec)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsrc-d%2Fml.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsrc-d%2Fml?ref=badge_shield)
 
 Machine Learning models on top of Abstract Syntax Trees. Formerly known as **ast2vec**.
 
@@ -142,3 +143,6 @@ unittest discover /path/to/ast2vec
 ## License
 
 Apache 2.0.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsrc-d%2Fml.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsrc-d%2Fml?ref=badge_large)
