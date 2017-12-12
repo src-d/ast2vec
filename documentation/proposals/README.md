@@ -8,4 +8,4 @@ This is the index of Source{d} ML Improvement Proposals, known as MLIPs.
 
 | Number | Status   | Title                                                                |
 | ------ | -------- |----------------------------------------------------------------------|
-| 0      | ?        | [ML structure proposal](ENIP-000.md)                                 |
+| 0      | ?        | [ML structure proposal](MLIP-000.md)                                 |
