@@ -9,7 +9,7 @@ else:
     typing = []
 
 setup(
-    name="sourcedml",
+    name="sourced-ml",
     description="Part of source{d}'s stack for machine learning on source "
                 "code. Provides API and tools to train and use models based "
                 "on source code identifiers extracted from Babelfish's UASTs.",
@@ -20,6 +20,7 @@ setup(
     url="https://github.com/src-d/ml",
     download_url="https://github.com/src-d/ml",
     packages=find_packages(exclude=("sourced.ml.tests",)),
+    namespace_packages=["sourced"],
     entry_points={
         "console_scripts": ["sourcedml=sourced.ml.__main__:main"],
     },
