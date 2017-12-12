@@ -2,8 +2,8 @@ import unittest
 
 from bblfsh import BblfshClient
 
+from sourced.ml.algorithms import UastRandomWalk2Bag, UastSeq2Bag
 from sourced.ml.tests.models import SOURCE_PY
-from sourced.ml.uast_struct_to_bag import UastRandomWalk2Bag, UastSeq2Bag
 
 
 class Uast2RandomWalk2BagTest(unittest.TestCase):

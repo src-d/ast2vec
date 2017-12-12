@@ -1,67 +1,8 @@
 import logging
 
-from modelforge import Model, split_strings, merge_strings, register_model
 import numpy
 
-
-@register_model
-class Id2Vec(Model):
-    """
-    id2vec model - source code identifier embeddings.
-    """
-    NAME = "id2vec"
-
-    def construct(self, embeddings, tokens):
-        self._embeddings = embeddings
-        self._tokens = tokens
-        self._log.info("Building the token index...")
-        self._token2index = {w: i for i, w in enumerate(self._tokens)}
-        return self
-
-    def _load_tree(self, tree):
-        self.construct(embeddings=tree["embeddings"].copy(),
-                       tokens=split_strings(tree["tokens"]))
-
-    def dump(self):
-        return """Shape: %s
-First 10 words: %s""" % (
-            self.embeddings.shape, self.tokens[:10])
-
-    @property
-    def embeddings(self):
-        """
-        :class:`numpy.ndarray` with the embeddings of shape
-        (N tokens x embedding dims).
-        """
-        return self._embeddings
-
-    @property
-    def tokens(self):
-        """
-        List with the processed source code identifiers.
-        """
-        return self._tokens
-
-    def items(self):
-        """
-        Returns the tuples belonging to token -> index mapping.
-        """
-        return self._token2index.items()
-
-    def __getitem__(self, item):
-        """
-        Returns the index of the specified processed source code identifier.
-        """
-        return self._token2index[item]
-
-    def __len__(self):
-        """
-        Returns the number of tokens in the model.
-        """
-        return len(self._tokens)
-
-    def _generate_tree(self):
-        return {"embeddings": self.embeddings, "tokens": merge_strings(self.tokens)}
+from sourced.ml.models import Id2Vec
 
 
 def projector_entry(args):
@@ -70,7 +11,7 @@ def projector_entry(args):
     log = logging.getLogger("id2vec_projector")
     id2vec = Id2Vec(log_level=args.log_level).load(source=args.input)
     if args.df:
-        from sourced.ml.df import DocumentFrequencies
+        from sourced.ml.models import DocumentFrequencies
         df = DocumentFrequencies(log_level=args.log_level).load(source=args.df)
     else:
         df = None
@@ -106,7 +47,7 @@ def projector_entry(args):
     if freqs is not None:
         labels.append("docfreq")
         tokens = list(zip(tokens, (str(i) for i in freqs)))
-    import sourced.ml.projector as projector
+    import sourced.ml.utils.projector as projector
     projector.present_embeddings(args.output, not args.no_browser, labels, tokens, embeddings)
     if not args.no_browser:
         projector.wait()

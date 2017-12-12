@@ -6,11 +6,10 @@ import unittest
 from contextlib import contextmanager
 from io import StringIO
 
+import modelforge.gcs_backend as gcs_backend
 import sourced.ml.tests.models as paths
 from sourced.ml.tests.fake_requests import FakeRequests
-
-import modelforge.gcs_backend as gcs_backend
-from sourced.ml.dump import dump_model
+from sourced.ml.utils import dump_model
 
 
 @contextmanager

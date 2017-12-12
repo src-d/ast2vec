@@ -3,8 +3,9 @@ import os
 import tempfile
 import unittest
 
-from sourced.ml.topics import Topics, bigartm2asdf_entry
 import sourced.ml.tests.models as paths
+from sourced.ml.models import Topics
+from sourced.ml.utils import bigartm2asdf_entry
 
 
 class TopicsTests(unittest.TestCase):

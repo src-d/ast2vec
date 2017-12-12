@@ -4,10 +4,10 @@ import os
 import tempfile
 import unittest
 
-from sourced.ml.bow import NBOW, BOW
-import sourced.ml.vw_dataset
-from sourced.ml.vw_dataset import convert_bow_to_vw, bow2vw_entry
+import sourced
 import sourced.ml.tests.models as paths
+from sourced.ml.models import NBOW, BOW
+from sourced.ml.models.bow import bow2vw_entry
 
 
 class Bow2vwTests(unittest.TestCase):
@@ -19,7 +19,7 @@ class Bow2vwTests(unittest.TestCase):
         with tempfile.NamedTemporaryFile(prefix="sourced.ml-vw-") as fout:
             logging.getLogger().level = logging.ERROR
             try:
-                convert_bow_to_vw(bow, fout.name)
+                bow.convert_bow_to_vw(fout.name)
             finally:
                 logging.getLogger().level = logging.INFO
             fout.seek(0)
@@ -39,12 +39,12 @@ class Bow2vwTests(unittest.TestCase):
         args = argparse.Namespace(nbow=os.path.join(os.path.dirname(__file__), paths.NBOW),
                                   id2vec=os.path.join(os.path.dirname(__file__), paths.ID2VEC),
                                   output="out.test")
-        backup = sourced.ml.vw_dataset.convert_bow_to_vw
-        sourced.ml.vw_dataset.convert_bow_to_vw = fake_convert_bow_to_vw
+        backup = sourced.ml.models.BOW.convert_bow_to_vw
+        sourced.ml.models.BOW.convert_bow_to_vw = fake_convert_bow_to_vw
         try:
             bow2vw_entry(args)
         finally:
-            sourced.ml.vw_dataset.convert_bow_to_vw = backup
+            sourced.ml.models.BOW.convert_bow_to_vw = backup
         self.assertIsInstance(called[0], BOW)
         self.assertEqual(called[1], "out.test")
 

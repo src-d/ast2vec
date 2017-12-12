@@ -7,12 +7,13 @@ import unittest
 import asdf
 import numpy
 import tensorflow as tf
-from sourced.ml import DocumentFrequencies, swivel, Id2Vec
-from sourced.ml.id_embedding import preprocess, run_swivel, postprocess, SwivelTransformer, \
-    PostprocessTransformer, PreprocessTransformer
 from scipy.sparse import coo_matrix
 
 from modelforge.model import split_strings, assemble_sparse_matrix
+from sourced.ml.algorithms import swivel
+from sourced.ml.algorithms.id_embedding import preprocess, run_swivel, postprocess, SwivelTransformer, \
+    PostprocessTransformer, PreprocessTransformer
+from sourced.ml.models import DocumentFrequencies, Id2Vec
 from sourced.ml.tests.test_dump import captured_output
 
 
