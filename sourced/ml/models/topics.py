@@ -1,7 +1,7 @@
 from typing import Union
 
-from modelforge import register_model, Model, split_strings, assemble_sparse_matrix, merge_strings, \
-    disassemble_sparse_matrix
+from modelforge import register_model, Model, split_strings, assemble_sparse_matrix, \
+    merge_strings, disassemble_sparse_matrix
 
 
 @register_model

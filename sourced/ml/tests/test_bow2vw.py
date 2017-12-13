@@ -31,7 +31,7 @@ class Bow2vwTests(unittest.TestCase):
         self.assertEqual(hits, 6)
 
     def test_repo2bow_entry(self):
-        called = [None] * 3
+        called = [None] * 2
 
         def fake_convert_bow_to_vw(*args):
             called[:] = args

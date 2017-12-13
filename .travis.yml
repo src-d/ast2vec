@@ -11,10 +11,15 @@ addons:
     packages:
       - libboost-all-dev
       - libxml2-dev
+      - libsnappy-dev
 _install: &_install
   - gimme 1.8
   - source ~/.gimme/envs/latest.env
   - pip install --upgrade pip
+  - (cd /tmp && wget "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=spark/spark-2.2.0/spark-2.2.0-bin-hadoop2.7.tgz" -O spark-2.2.0-bin-hadoop2.7.tgz; tar -C ~/ -xvzf spark-2.2.0-bin-hadoop2.7.tgz)
+  - export SPARK_HOME=~/spark-2.2.0-bin-hadoop2.7
+  - export PATH=$PATH:$SPARK_HOME/bin
+  - (cd "$(python -c 'import pyspark; print(pyspark.__path__[0])')/jars"; wget http://search.maven.org/remotecontent?filepath=tech/sourced/engine/0.2.0/engine-0.2.0.jar -O engine.jar)
   - pip install -r requirements.txt codecov
   - pip install -e .
 _coverage: &_coverage

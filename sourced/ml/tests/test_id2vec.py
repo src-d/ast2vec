@@ -4,11 +4,10 @@ import os
 import unittest
 
 import numpy
-import sourced.ml.projector as projector
 
 import sourced.ml.tests.models as paths
 from sourced.ml.models import Id2Vec
-from sourced.ml.utils import projector_entry
+from sourced.ml.utils import projector, projector_entry
 
 
 class Id2VecTests(unittest.TestCase):

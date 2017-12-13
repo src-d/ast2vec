@@ -3,9 +3,10 @@ import logging
 from typing import Union
 
 from modelforge import Model, split_strings, assemble_sparse_matrix, \
-    merge_strings, disassemble_sparse_matrix, register_model, progress_bar
+    merge_strings, disassemble_sparse_matrix, register_model
+from modelforge.progress_bar import progress_bar
 
-from sourced.ml.models import Id2Vec
+from sourced.ml.models.id2vec import Id2Vec
 
 
 class BOWBase(Model):
@@ -140,7 +141,7 @@ class BOW(BOWBase):
         log = logging.getLogger("bow2vw")
         log.info("Writing %s", output)
         with open(output, "w") as fout:
-            for index in progress_bar(self, log, expected_size=len(bow)):
+            for index in progress_bar(self, log, expected_size=len(self)):
                 record = self[index]
                 fout.write(record[0].replace(":", "").replace(" ", "_") + " ")
                 pairs = []
@@ -198,4 +199,4 @@ def bow2vw_entry(args: argparse.Namespace):
         bow = BOW().load(source=args.bow)
     else:
         bow = NBOW.as_bow(args.nbow, args.id2vec)
-    bow.convert_bow_to_vw(bow, args.output)
+    bow.convert_bow_to_vw(args.output)

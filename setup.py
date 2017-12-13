@@ -1,7 +1,8 @@
+from importlib.machinery import SourceFileLoader
 from setuptools import setup, find_packages
 import sys
 
-import sourced.ml
+sourcedml = SourceFileLoader("sourced.ml", "./sourced/ml/__init__.py").load_module()
 
 if sys.version_info < (3, 5, 0):
     typing = ["typing"]
@@ -13,7 +14,7 @@ setup(
     description="Part of source{d}'s stack for machine learning on source "
                 "code. Provides API and tools to train and use models based "
                 "on source code identifiers extracted from Babelfish's UASTs.",
-    version=".".join(map(str, sourced.ml.__version__)),
+    version=".".join(map(str, sourcedml.__version__)),
     license="Apache 2.0",
     author="source{d}",
     author_email="machine-learning@sourced.tech",
@@ -28,7 +29,9 @@ setup(
               "github", "swivel", "nbow", "bblfsh", "babelfish"],
     install_requires=["PyStemmer>=1.3,<2.0",
                       "bblfsh>-2.2.1,<3.0",
-                      "modelforge>=0.5.0-alpha"] + typing,
+                      "modelforge>=0.5.0-alpha",
+                      "sourced-engine>=0.2.0,<0.3",
+                      "parquet>=1.2,<2.0"] + typing,
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0,<2.0"],

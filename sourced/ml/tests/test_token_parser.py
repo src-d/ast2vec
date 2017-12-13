@@ -44,9 +44,9 @@ class NoopTokenParserTests(unittest.TestCase):
         self.tp = NoopTokenParser()
 
     def test_process_token(self):
-        self.assertEqual(self.tp.process_token("abcdef"), ["abcdef"])
-        self.assertEqual(self.tp.process_token("abcd_ef"), ["abcd_ef"])
-        self.assertEqual(self.tp.process_token("abcDef"), ["abcDef"])
+        self.assertEqual(list(self.tp.process_token("abcdef")), ["abcdef"])
+        self.assertEqual(list(self.tp.process_token("abcd_ef")), ["abcd_ef"])
+        self.assertEqual(list(self.tp.process_token("abcDef")), ["abcDef"])
 
 
 if __name__ == "__main__":

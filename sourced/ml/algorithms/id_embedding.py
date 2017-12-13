@@ -113,7 +113,8 @@ def preprocess(args):
     if args.df is not None:
         log.info("Writing the document frequencies to %s...", args.df)
         model = DocumentFrequencies()
-        model.construct(docs=len(inputs) - skipped, tokens=chosen_words, freqs=chosen_freqs)
+        tokfreq = dict(zip(chosen_words, chosen_freqs))
+        model.construct(docs=len(inputs) - skipped, tokfreq=tokfreq)
         model.save(args.df)
     del chosen_freqs
 
