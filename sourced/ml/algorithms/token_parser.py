@@ -72,10 +72,10 @@ class TokenParser:
         self._stemmer = Stemmer.Stemmer("english")
 
 
-class NoTokenParser:
+class NoopTokenParser:
     """
     One can use this class if he or she does not want to do any parsing.
     """
 
     def process_token(self, token):
-        return [token]
+        yield token

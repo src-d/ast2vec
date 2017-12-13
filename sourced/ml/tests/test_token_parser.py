@@ -1,7 +1,7 @@
 import pickle
 import unittest
 
-from sourced.ml.algorithms import TokenParser, NoTokenParser
+from sourced.ml.algorithms import TokenParser, NoopTokenParser
 
 
 class TokenParserTests(unittest.TestCase):
@@ -39,9 +39,9 @@ class TokenParserTests(unittest.TestCase):
         self.assertEqual(tp.stem("embedding"), "embed")
 
 
-class NoTokenParserTests(unittest.TestCase):
+class NoopTokenParserTests(unittest.TestCase):
     def setUp(self):
-        self.tp = NoTokenParser()
+        self.tp = NoopTokenParser()
 
     def test_process_token(self):
         self.assertEqual(self.tp.process_token("abcdef"), ["abcdef"])
