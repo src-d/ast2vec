@@ -9,6 +9,7 @@ from sourced.ml.extractors import BagsExtractor, register_extractor
 class LiteralsBagExtractor(BagsExtractor):
     NAME = "lit"
     NAMESPACE = "l."
+    OPTS = BagsExtractor.OPTS.copy()
 
     class HashedTokenParser:
         def process_token(self, token):

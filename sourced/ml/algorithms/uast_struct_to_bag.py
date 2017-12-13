@@ -35,17 +35,17 @@ class UastSeq2Bag(UastStructure2BagBase):
         seq = []
         self._uast2seq(uast, seq)
 
-        seq = [self.node2ind(n) for n in seq]
+        # convert to str - requirement from wmhash.BagsExtractor
+        seq = "".join([self.node2ind(n) for n in seq])
 
         if isinstance(self.seq_len, int):
             seq_lens = [self.seq_len]
         else:
             seq_lens = self.seq_len
-        for seq_ in seq:
-            for seq_len in seq_lens:
-                for i in range(0, len(seq_) - seq_len, self.stride):
-                    # convert to str - requirement from wmhash.BagsExtractor
-                    bag["".join(seq_[i:i + seq_len])] += 1
+
+        for seq_len in seq_lens:
+            for i in range(0, len(seq) - seq_len + 1, self.stride):
+                bag[seq[i:i + seq_len]] += 1
         return bag
 
     def node2ind(self, node):

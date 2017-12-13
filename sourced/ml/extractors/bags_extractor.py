@@ -10,12 +10,15 @@ class BagsExtractor(PickleableLogger):
     """
     DEFAULT_DOCFREQ_THRESHOLD = 5
     NAMESPACE = None  # the beginning of each element in the bag
-    OPTS = {}  # cmdline args which are passed into __init__()
+    OPTS = {"scale": None}  # cmdline args which are passed into __init__()
+    DEFAULT_SCALE = 1
 
-    def __init__(self, docfreq_threshold=None, **kwargs):
+    def __init__(self, docfreq_threshold=None, scale=None, **kwargs):
         """
         :param docfreq_threshold: The minimum number of occurrences of an element to be included \
                                   into the bag
+        :param scale: TF-IDF will be multiplied by this scale to change importance of specific \
+                      bag extractor
         """
         super().__init__(**kwargs)
         if docfreq_threshold is None:
@@ -23,6 +26,10 @@ class BagsExtractor(PickleableLogger):
         self.docfreq_threshold = docfreq_threshold
         self.docfreq = {}
         self._ndocs = 0
+        if scale is None:
+            self.scale = self.DEFAULT_SCALE
+        else:
+            self.scale = scale
 
     @property
     def docfreq_threhold(self):
@@ -58,7 +65,7 @@ class BagsExtractor(PickleableLogger):
         for key, val in self.uast_to_bag(uast).items():
             key = self.NAMESPACE + key
             try:
-                yield key, log(1 + val) * log(ndocs / docfreq[key])
+                yield key, log(1 + val) * log(ndocs / docfreq[key]) * self.scale
             except KeyError:
                 # docfreq_threshold
                 continue

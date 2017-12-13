@@ -17,3 +17,8 @@ def get_names_from_kwargs(f):
         if v.default != inspect.Parameter.empty and isinstance(
                 v.default, (str, int, float, tuple)):
             yield k.replace("_", "-"), v.default
+
+
+def filter_kwargs(kwargs, func):
+    func_param = inspect.signature(func).parameters.keys()
+    return dict([(k, v) for k, v in kwargs.items() if k in func_param])
