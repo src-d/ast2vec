@@ -21,7 +21,7 @@ setup(
     url="https://github.com/src-d/ml",
     download_url="https://github.com/src-d/ml",
     packages=find_packages(exclude=("sourced.ml.tests",)),
-    namespace_packages=['sourced'],
+    namespace_packages=["sourced"],
     entry_points={
         "console_scripts": ["sourcedml=sourced.ml.__main__:main"],
     },
