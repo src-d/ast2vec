@@ -5,3 +5,5 @@ from sourced.ml.extractors.identifiers import IdentifiersBagExtractor
 from sourced.ml.extractors.literals import LiteralsBagExtractor
 from sourced.ml.extractors.uast_random_walk import UastRandomWalkBagExtractor
 from sourced.ml.extractors.uast_seq import UastSeqBagExtractor
+from sourced.ml.extractors.internal_type_children import InternalTypeChildrenBagExtractor
+from sourced.ml.extractors.roles_children import RoleTypeChildrenBagExtractor
