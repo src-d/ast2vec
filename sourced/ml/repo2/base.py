@@ -4,6 +4,7 @@ from typing import Union
 
 from pyspark import StorageLevel
 from pyspark.sql.types import Row
+from pyspark.sql.functions import col, udf
 
 from sourced.ml.pickleable_logger import PickleableLogger  # nopep8
 
@@ -83,7 +84,7 @@ class Transformer(PickleableLogger):
 
     def execute(self, head=None):
         """
-        Execute the node together will all its dependencies, in order.
+        Execute the node together with all its dependencies, in order.
         :param head: The input to feed to the ultimate parent. Can be None - the default one \
                      will be used if possible.
         :return: The result of the execution.
@@ -159,6 +160,13 @@ class Cacher(Transformer):
             self.trace = self.path()
         return self.head
 
+    @staticmethod
+    def maybe(pipeline, persistence):
+        if persistence is not None:
+            return pipeline.link(Cacher(persistence))
+        else:
+            return pipeline
+
 
 class Engine(Transformer):
     def __init__(self, engine, **kwargs):
@@ -187,11 +195,9 @@ class UastExtractor(Transformer):
 
     def __call__(self, files):
         files = files.dropDuplicates(("blob_id",)).filter("is_binary = 'false'")
-        classified = files.classify_languages()
-        lang_filter = classified.lang == self.languages[0]
-        for lang in self.languages[1:]:
-            lang_filter |= classified.lang == lang
-        filtered_by_lang = classified.filter(lang_filter)
+        filtered_by_lang = files \
+            .classify_languages() \
+            .filter(col("lang").isin(self.languages))
         uasts = filtered_by_lang.extract_uasts()
         return uasts
 

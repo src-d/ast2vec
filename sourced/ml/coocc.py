@@ -45,8 +45,6 @@ Matrix: shape: %s non-zero: %d""" % (
         """
         return len(self._tokens)
 
-    def _write(self, output):
-        write_model(self.meta,
-                    {"tokens": merge_strings(self.tokens),
-                     "matrix": disassemble_sparse_matrix(self.matrix)},
-                    output)
+    def _generate_tree(self):
+        return {"tokens": merge_strings(self.tokens),
+                "matrix": disassemble_sparse_matrix(self.matrix)}
