@@ -36,18 +36,20 @@ class CooccModelSaver(Transformer):
 
 
 class CooccConstructor(Transformer):
-    def __init__(self, token2index, token_parser, prune_size=1, **kwargs):
+    """
+    Co-occurrence matrix calculation transformer.
+    You can find an algorithm full description in :ref:`coocc.md`
+    """
+    def __init__(self, token2index, token_parser, **kwargs):
         super().__init__(**kwargs)
         self.token2index = token2index
         self.token_parser = token_parser
 
-        # TODO(zurk): implement pruning
-        self.prune_size = prune_size
-
     def _flatten_children(self, root):
         ids = []
         stack = list(root.children)
-        for node in stack:
+        while stack:
+            node = stack.pop(0)
             if bblfsh_roles.IDENTIFIER in node.roles and \
                     bblfsh_roles.QUALIFIED not in node.roles:
                 ids.append(node)
@@ -56,31 +58,20 @@ class CooccConstructor(Transformer):
         return ids
 
     def _traverse_uast(self, uast: Node):
-        """
-        Traverses UAST.
-        """
-
         stack = [uast]
-        new_stack = []
 
         while stack:
-            for node in stack:
-                children = self._flatten_children(node)
-                tokens = []
-                for ch in children:
-                    tokens.extend(self.token_parser(ch.token))
-                token = node.token.strip()
-                if token != "" and \
-                        bblfsh_roles.IDENTIFIER in node.roles and \
-                        bblfsh_roles.QUALIFIED not in node.roles:
-                    tokens.extend(self.token_parser(token))
-                for pair in itertools.permutations(tokens, 2):
-                    yield pair
+            node = stack.pop(0)
+            children = self._flatten_children(node)
+            tokens = [token for ch in children for token in self.token_parser(ch.token)]
 
-                new_stack.extend(children)
+            if bblfsh_roles.IDENTIFIER in node.roles and \
+                    bblfsh_roles.QUALIFIED not in node.roles:
+                tokens.extend(self.token_parser(node.token))
+            for pair in itertools.permutations(tokens, 2):
+                yield pair
 
-            stack = new_stack
-            new_stack = []
+            stack.extend(children)
 
     def __call__(self, uasts):
         sparse_matrix = uasts.flatMap(self._process_row)\
