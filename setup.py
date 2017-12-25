@@ -25,7 +25,7 @@ setup(
     keywords=["machine learning on source code", "word2vec", "id2vec",
               "github", "swivel", "nbow", "bblfsh", "babelfish"],
     install_requires=["PyStemmer>=1.3,<2.0",
-                      "modelforge>=0.2.6-alpha,<0.4.0-alpha",
+                      "modelforge>=0.2.6-alpha,<0.6.0",
                       "bblfsh>=2.0,<3.0",
                       "grpcio==1.4.0",
                       "grpcio-tools==1.4.0",
