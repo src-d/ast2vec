@@ -38,8 +38,14 @@ class BagsBatcher(Transformer):
         ndocs = self.extractors[0].ndocs
         self._log.info("Average bag length: %.1f", avglen)
         self._log.info("Number of documents: %d", ndocs)
+        quant_map = None
+        for e in self.extractors:
+            try:
+                quant_map = e.quant_map
+            except AttributeError:
+                continue
         self.model = OrderedDocumentFrequencies().construct(
-            self.extractors[0].ndocs, [e.docfreq for e in self.extractors])
+            self.extractors[0].ndocs, [e.docfreq for e in self.extractors] + [quant_map])
         self._log.info("Vocabulary size: %d", len(self.model))
         chunklen = int(self.chunk_size / (2 * 4 * avglen))
         nparts = ndocs // chunklen + 1

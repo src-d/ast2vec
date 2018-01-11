@@ -24,8 +24,16 @@ class DocumentFrequencies(Model):
             df = tokfreqs
         else:
             df = {}
-            for d in tokfreqs:
-                df.update(d)
+            self.quant_map = tokfreqs[-1]
+            if self.quant_map:
+                for d in tokfreqs[:-1]:
+                    df.update(d)
+            else:
+                try:
+                    for d in tokfreqs:
+                        df.update(d)
+                except TypeError:
+                    pass
         self._docs = docs
         self._df = df
         return self
