@@ -1,10 +1,11 @@
+import logging
 from typing import Union
 
 from pyspark import StorageLevel, Row, RDD
 from pyspark.sql import DataFrame
 
 from sourced.ml.transformers.transformer import Transformer
-from sourced.ml.utils import EngineConstants
+from sourced.ml.utils import EngineConstants, spark_config, create_spark
 
 
 class Sampler(Transformer):
@@ -155,6 +156,17 @@ class ParquetLoader(Transformer):
         if isinstance(self.paths, str):
             return self.session.read.parquet(self.paths)
         raise ValueError
+
+
+def create_parquet_loader(session_name, repositories, config=None, memory="", packages=None,
+                          **spark_kwargs):
+    config, packages = spark_config(config=config, packages=packages, memory=memory)
+    session = create_spark(session_name, config=config, packages=packages,
+                           **spark_kwargs)
+    log = logging.getLogger("parquet")
+    log.info("Initializing on %s", repositories)
+    parquet = ParquetLoader(session, repositories)
+    return parquet
 
 
 class UastDeserializer(Transformer):
