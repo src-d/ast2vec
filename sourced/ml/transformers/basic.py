@@ -8,6 +8,30 @@ from sourced.ml.transformers.transformer import Transformer
 from sourced.ml.utils import EngineConstants, assemble_spark_config, create_spark
 
 
+class CsvSaver(Transformer):
+    def __init__(self, output, **kwargs):
+        super().__init__(**kwargs)
+        self.output = output
+
+    def __call__(self, head: RDD):
+        self._log.info("Writing %s", self.output)
+        return head.toDF() \
+            .repartition(1) \
+            .write \
+            .option("header", "true") \
+            .mode("overwrite") \
+            .csv(self.output)
+
+
+class Mapper(Transformer):
+    def __init__(self, function, **kwargs):
+        super().__init__(**kwargs)
+        self.function = function
+
+    def __call__(self, head: RDD):
+        return head.map(self.function)
+
+
 class Sampler(Transformer):
     """
     Wraps `sample()` function from pyspark Dataframe.
@@ -18,7 +42,7 @@ class Sampler(Transformer):
         self.fraction = fraction
         self.seed = seed
 
-    def __call__(self, head):
+    def __call__(self, head: RDD):
         return head.sample(self.with_replacement, self.fraction, self.seed)
 
 

@@ -44,5 +44,6 @@ class QuantizationLevelsTests(unittest.TestCase):
     def test_dump(self):
         self.assertEqual(self.model.dump(), "Schemes: [('children', '259@10')]")
 
+
 if __name__ == "__main__":
     unittest.main()
