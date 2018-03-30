@@ -12,8 +12,8 @@ from sourced.ml.utils.engine import pause
 
 @pause
 def repos2roles_and_ids_entry(args):
-    log = logging.getLogger("repos2df")
-    engine = create_engine("repos2df-%s" % uuid4(), **args.__dict__)
+    log = logging.getLogger("repos2roles_and_ids")
+    engine = create_engine("repos2roles_and_ids-%s" % uuid4(), **args.__dict__)
     extractors = [RolesAndIdsExtractor(args.split)]
 
     ignition = Ignition(engine, explain=args.explain)

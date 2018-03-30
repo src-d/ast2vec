@@ -7,7 +7,7 @@ from sourced.ml.algorithms.uast_ids_to_bag import UastIds2Bag
 
 class MergeRoles:
     def __getitem__(self, roles):
-        return ",".join(bblfsh.role_name(r) for r in sorted(roles))
+        return " ".join(bblfsh.role_name(r) for r in sorted(roles))
 
 
 class Uast2RoleIdPairs(UastIds2Bag):
@@ -40,9 +40,36 @@ class Uast2RoleIdPairs(UastIds2Bag):
         :param uast: The UAST root node.
         :return: a list of identifier, role pairs.
         """
-        for node in bblfsh.filter(uast, self.XPATH):
+        yield from self._process_uast(uast, [])
+
+    def _process_uast(self, node, ancestors):
+        identifier_id = bblfsh.role_id("IDENTIFIER")
+        operator_id = bblfsh.role_id("OPERATOR")
+        exclude = {
+            bblfsh.role_id("EXPRESSION"),
+            identifier_id,
+            bblfsh.role_id("LEFT"),
+            bblfsh.role_id("QUALIFIED"),
+            bblfsh.role_id("BINARY"),
+            bblfsh.role_id("ASSIGNMENT"),
+        }
+
+        if identifier_id in node.roles and node.token:
+            roles = set(node.roles)
+            indx = -1
+            # We skip all Nodes with EXPRESSION role or EXPRESSION, IDENTIFIER or
+            # EXPRESSION, IDENTIFIER roles.
+            # For them we take first parent Node from stack with another Role set.
+            while not (roles - exclude and operator_id not in roles):
+                roles = set(ancestors[indx].roles)
+                indx -= 1
             for sub in self._token_parser.process_token(node.token):
                 try:
-                    yield (self._token2index[sub], self._roles2index[node.roles])
+                    yield (self._token2index[sub], self._roles2index[roles])
                 except KeyError:
                     continue
+
+        ancestors.append(node)
+        for child in node.children:
+            yield from self._process_uast(child, ancestors)
+        ancestors.pop()
