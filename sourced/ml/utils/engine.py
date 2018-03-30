@@ -36,10 +36,12 @@ def add_engine_args(my_parser, default_packages=None):
     my_parser.add_argument(
         "--engine", default=EngineDefault.VERSION,
         help="source{d} engine version.")
-    my_parser.add_argument("--repository-format", default="siva",
-                           help="Repository storage input format.")
-    my_parser.add_argument("--explain", action="store_true",
-                           help="Print the PySpark execution plans.")
+    my_parser.add_argument(
+        "--repository-format", default="siva",
+        help="Repository storage input format.")
+    my_parser.add_argument(
+        "--explain", action="store_true",
+        help="Print the PySpark execution plans.")
 
 
 def add_engine_dependencies(engine=EngineDefault.VERSION, config=None, packages=None):

@@ -1,3 +1,4 @@
+from bblfsh import Node
 from collections import defaultdict
 from typing import Dict
 
@@ -6,7 +7,7 @@ class Uast2BagBase:
     """
     Base class to convert UAST to a bag of anything.
     """
-    def __call__(self, uast) -> Dict[str, int]:
+    def __call__(self, uast: Node):
         """
         Inheritors must implement this function.
 
@@ -19,7 +20,7 @@ class Uast2BagThroughSingleScan(Uast2BagBase):
     """
     Constructs the bag by doing a single tree traversal and turning every node into a string.
     """
-    def __call__(self, uast):
+    def __call__(self, uast: Node) -> Dict[str, int]:
         result = defaultdict(int)
         stack = [uast]
         while stack:

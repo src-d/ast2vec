@@ -35,5 +35,6 @@ class Uast2NodesBagTest(unittest.TestCase):
         levels = self.nodes_bag_extractor.quantize_unwrapped(freqs.items())
         self.assertEqual(list(levels), [1, 2, 5, 7])
 
+
 if __name__ == "__main__":
     unittest.main()

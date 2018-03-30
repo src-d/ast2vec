@@ -145,5 +145,6 @@ Matrix: shape: (304, 304) non-zero: 16001
         return argparse.Namespace(input=input, gcs_bucket=gcs, dependency=dependency,
                                   log_level="WARNING")
 
+
 if __name__ == "__main__":
     unittest.main()
