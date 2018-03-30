@@ -8,3 +8,4 @@ from sourced.ml.extractors.uast_seq import UastSeqBagExtractor
 from sourced.ml.extractors.children import ChildrenBagExtractor
 from sourced.ml.extractors.graphlets import GraphletBagExtractor
 from sourced.ml.extractors.roles_and_ids import RolesAndIdsExtractor
+from sourced.ml.extractors.identifier_distance import IdentifierDistance

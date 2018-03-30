@@ -10,3 +10,4 @@ from sourced.ml.cmd_entries.repos2df import repos2df_entry
 from sourced.ml.cmd_entries.repos2ids import repos2ids_entry
 from sourced.ml.cmd_entries.run_swivel import run_swivel
 from sourced.ml.cmd_entries.repos2roles_and_ids import repos2roles_and_ids_entry
+from sourced.ml.cmd_entries.repos2id_distance import repos2id_distance_entry

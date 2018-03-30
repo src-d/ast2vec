@@ -24,6 +24,7 @@ class MainTests(unittest.TestCase):
             "repos2ids": "repos2ids_entry",
             "repos2bow": "repos2bow_entry",
             "repos2roles_ids": "repos2roles_and_ids_entry",
+            "repos2id_distance": "repos2id_distance_entry"
         }
         parser = main.get_parser()
         subcommands = set([x.dest for x in parser._subparsers._actions[2]._choices_actions])

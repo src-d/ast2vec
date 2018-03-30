@@ -5,9 +5,10 @@ import sys
 
 from modelforge.logs import setup_logging
 
+from sourced.ml.extractors import IdentifierDistance
 from sourced.ml.cmd_entries import bigartm2asdf_entry, dump_model, projector_entry, bow2vw_entry, \
     run_swivel, postprocess_id2vec, preprocess_id2vec, repos2coocc_entry, repos2df_entry, \
-    repos2ids_entry, repos2bow_entry, repos2roles_and_ids_entry
+    repos2ids_entry, repos2bow_entry, repos2roles_and_ids_entry, repos2id_distance_entry
 from sourced.ml.cmd_entries.args import add_repo2_args, add_feature_args, \
     add_vocabulary_size_arg, add_extractor_args, add_split_stem_arg
 from sourced.ml.cmd_entries.repos2bow import add_bow_args
@@ -97,6 +98,24 @@ def get_parser() -> argparse.ArgumentParser:
     add_extractor_args(repos2roles_and_ids)
     add_split_stem_arg(repos2roles_and_ids)
     repos2roles_and_ids.add_argument(
+        "-o", "--output", required=True,
+        help="[OUT] Path to the directory where spark save result. Result is csv, status and "
+             "sumcheck files.")
+    # ------------------------------------------------------------------------
+    repos2identifier_distance = add_parser(
+        "repos2id_distance", "Converts a UAST to a list of identifier pairs "
+                             "and distance between them.")
+    repos2identifier_distance.set_defaults(handler=repos2id_distance_entry)
+    add_engine_args(repos2identifier_distance)
+    add_extractor_args(repos2identifier_distance)
+    add_split_stem_arg(repos2identifier_distance)
+    repos2identifier_distance.add_argument(
+        "-t", "--type", required=True, choices=IdentifierDistance.DistanceType.All,
+        help="Distance type.")
+    repos2identifier_distance.add_argument(
+        "--max-distance", default=IdentifierDistance.DEFAULT_MAX_DISTANCE,
+        help="Maximum distance to save.")
+    repos2identifier_distance.add_argument(
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark save result. Result is csv, status and "
              "sumcheck files.")
