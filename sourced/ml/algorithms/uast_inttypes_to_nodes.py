@@ -1,5 +1,6 @@
 from typing import Union, Iterable, Tuple
 
+from bblfsh import Node
 import numpy
 
 from sourced.ml.algorithms.uast_to_bag import Uast2BagThroughSingleScan
@@ -10,11 +11,11 @@ class Uast2QuantizedChildren(Uast2BagThroughSingleScan):
     Converts a UAST to a bag of children counts.
     """
 
-    def __init__(self, npartitions=10):
+    def __init__(self, npartitions: int=10):
         self.npartitions = npartitions
         self.levels = {}
 
-    def node2key(self, node) -> Union[str, Tuple[str, int]]:
+    def node2key(self, node: Node) -> Union[str, Tuple[str, int]]:
         """
         :param node: a node in UAST.
         :return: The string which consists of the internal type of the node and its number of

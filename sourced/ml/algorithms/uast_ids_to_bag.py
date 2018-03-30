@@ -20,7 +20,6 @@ class UastTokens2Bag(Uast2BagBase):
 
     def __init__(self, token2index=None, token_parser=None):
         """
-        :param xpath: The libuast xpath query to filter nodes with needed tokens.
         :param token2index: The mapping from tokens to bag keys. If None, no mapping is performed.
         :param token_parser: Specify token parser if you want to use a custom one. \
             :class:'NoopTokenParser' is used if it is not specified.

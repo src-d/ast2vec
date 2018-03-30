@@ -66,5 +66,6 @@ class DocumentFrequenciesTests(unittest.TestCase):
         self.assertEqual(self.model._df, new_model._df)
         self.assertEqual(self.model.docs, new_model.docs)
 
+
 if __name__ == "__main__":
     unittest.main()
