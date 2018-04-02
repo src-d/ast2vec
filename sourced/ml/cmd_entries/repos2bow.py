@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 from uuid import uuid4
 
 from sourced.ml.extractors import create_extractors_from_args
@@ -61,6 +62,12 @@ def repos2bow_entry_template(args, select=HeadFiles, cache_hook=None):
     log.info("Calculating the document frequencies...")
     df = uast_extractor.link(BagFeatures2DocFreq()).execute()
     log.info("Writing docfreq to %s", args.docfreq)
+    dirs = os.path.split(args.docfreq)[0]
+    if dirs:
+        os.makedirs(dirs, exist_ok=True)
+    dirs = os.path.split(args.bow)[0]
+    if dirs:
+        os.makedirs(dirs, exist_ok=True)
     df_model = OrderedDocumentFrequencies() \
         .construct(ndocs, df) \
         .prune(args.min_docfreq) \
