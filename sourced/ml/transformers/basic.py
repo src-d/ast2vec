@@ -124,21 +124,28 @@ class Counter(Transformer):
         return head.countApproxDistinct()
 
 
-class UastExtractor(Transformer):
+class LanguageSelector(Transformer):
     def __init__(self, languages: Union[list, tuple], **kwargs):
         super().__init__(**kwargs)
         self.languages = languages
 
-    def __call__(self, files: DataFrame) -> DataFrame:
-        files = files.dropDuplicates(("blob_id",)).filter("is_binary = 'false'")
+    def __call__(self, files) -> DataFrame:
         classified = files.classify_languages()
         lang_filter = classified.lang == self.languages[0]
         for lang in self.languages[1:]:
             lang_filter |= classified.lang == lang
         filtered_by_lang = classified.filter(lang_filter)
         from pyspark.sql import functions
-        uasts = filtered_by_lang.extract_uasts().where(functions.size(functions.col("uast")) > 0)
-        return uasts
+        return filtered_by_lang.where(functions.length(functions.col("content")) > 0)
+
+
+class UastExtractor(Transformer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __call__(self, files: DataFrame) -> DataFrame:
+        from pyspark.sql import functions
+        return files.extract_uasts().where(functions.size(functions.col("uast")) > 0)
 
 
 class FieldsSelector(Transformer):

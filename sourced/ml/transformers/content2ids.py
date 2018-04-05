@@ -7,7 +7,7 @@ import pygments
 from pygments.formatter import Formatter
 from pygments.lexers import get_lexer_by_name, ClassNotFound
 from pyspark import RDD, Row
-from pyspark.sql import functions
+from pyspark.sql import DataFrame
 
 from sourced.ml.algorithms import TokenParser
 from sourced.ml.transformers import Transformer
@@ -36,8 +36,8 @@ class ContentToIdentifiers(Transformer):
         self.linguist2pygments = self.build_mapping()
         self.split = split
 
-    def __call__(self, rows: RDD):
-        return rows.flatMap(self.process_row)
+    def __call__(self, rows: DataFrame):
+        return rows.rdd.flatMap(self.process_row)
 
     def process_row(self, row: Row):
         self.names = []
@@ -146,17 +146,3 @@ class IdentifiersToDataset(Transformer):
             .map(lambda x: Row(
                     token=x,
                     token_split=" ".join(TokenParser(min_split_length=1).split(x))))
-
-
-class ContentExtractor(Transformer):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def __call__(self, files: RDD):
-        return files \
-            .dropDuplicates(("blob_id",)) \
-            .filter("is_binary = 'false'") \
-            .classify_languages() \
-            .filter("lang is not null") \
-            .where(functions.length(functions.col("content")) > 0) \
-            .rdd

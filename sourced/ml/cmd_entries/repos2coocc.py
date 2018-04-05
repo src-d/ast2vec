@@ -5,7 +5,7 @@ from sourced.ml.extractors import IdentifiersBagExtractor
 from sourced.ml.models import OrderedDocumentFrequencies
 from sourced.ml.transformers import Ignition, HeadFiles, UastExtractor, Cacher, UastDeserializer, \
     CooccConstructor, CooccModelSaver, BagFeatures2DocFreq, Uast2BagFeatures, Counter, \
-    UastRow2Document
+    UastRow2Document, LanguageSelector
 from sourced.ml.utils import create_engine
 from sourced.ml.utils.engine import pipeline_graph, pause
 
@@ -20,7 +20,8 @@ def repos2coocc_entry(args):
     ignition = Ignition(engine, explain=args.explain)
     uast_extractor = ignition \
         .link(HeadFiles()) \
-        .link(UastExtractor(languages=args.languages)) \
+        .link(LanguageSelector(languages=args.languages)) \
+        .link(UastExtractor()) \
         .link(UastRow2Document()) \
         .link(Cacher.maybe(args.persist))
     log.info("Extracting UASTs...")

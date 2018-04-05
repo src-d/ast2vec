@@ -6,7 +6,7 @@ from sourced.ml.extractors import create_extractors_from_args
 from sourced.ml.models import OrderedDocumentFrequencies, QuantizationLevels
 from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, Uast2Quant, \
     BagFeatures2DocFreq, BagFeatures2TermFreq, Uast2BagFeatures, HeadFiles, TFIDF, Cacher, \
-    Indexer, UastRow2Document, BOWWriter, Moder, create_parquet_loader
+    Indexer, UastRow2Document, BOWWriter, Moder, LanguageSelector, create_parquet_loader
 from sourced.ml.utils import create_engine
 from sourced.ml.utils.engine import pipeline_graph, pause
 
@@ -35,7 +35,8 @@ def repos2bow_entry_template(args, select=HeadFiles, cache_hook=None, save_hook=
 
         start_point = Ignition(engine, explain=args.explain) \
             .link(select()) \
-            .link(UastExtractor(languages=args.languages))
+            .link(LanguageSelector(languages=args.languages)) \
+            .link(UastExtractor())
 
     uast_extractor = start_point.link(Moder(args.mode)).link(Cacher.maybe(args.persist))
 
