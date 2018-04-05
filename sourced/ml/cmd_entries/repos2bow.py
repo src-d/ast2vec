@@ -3,11 +3,10 @@ from uuid import uuid4
 
 from sourced.ml.extractors import create_extractors_from_args
 from sourced.ml.models import OrderedDocumentFrequencies, QuantizationLevels
-from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, Uast2Quant, \
-    BagFeatures2DocFreq, BagFeatures2TermFreq, Uast2BagFeatures, HeadFiles, TFIDF, Cacher, \
-    Indexer, UastRow2Document, BOWWriter, Moder, LanguageSelector, create_parquet_loader
-from sourced.ml.utils import create_engine
-from sourced.ml.utils.engine import pipeline_graph, pause
+from sourced.ml.transformers import BagFeatures2DocFreq, BagFeatures2TermFreq, BOWWriter, \
+    Cacher, HeadFiles, Indexer, Moder, create_uast_source, TFIDF, UastDeserializer, \
+    UastRow2Document, Uast2Quant, Uast2BagFeatures
+from sourced.ml.utils import pause, pipeline_graph
 
 
 @pause
@@ -15,17 +14,7 @@ def repos2bow_entry_template(args, select=HeadFiles, cache_hook=None, save_hook=
     log = logging.getLogger("repos2bow")
     extractors = create_extractors_from_args(args)
     session_name = "repos2bow-%s" % uuid4()
-    if args.parquet:
-        start_point = create_parquet_loader(session_name, **args.__dict__)
-        root = start_point
-    else:
-        engine = create_engine(session_name, **args.__dict__)
-        root = engine
-
-        start_point = Ignition(engine, explain=args.explain) \
-            .link(select()) \
-            .link(LanguageSelector(languages=args.languages)) \
-            .link(UastExtractor())
+    root, start_point = create_uast_source(args, session_name, select=select)
 
     uast_extractor = start_point.link(Moder(args.mode)).link(Cacher.maybe(args.persist))
 

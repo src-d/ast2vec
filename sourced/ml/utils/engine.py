@@ -3,7 +3,7 @@ import logging
 import pip
 
 from sourced.engine import Engine
-from sourced.ml.utils import add_spark_args, create_spark, assemble_spark_config
+from sourced.ml.utils.spark import add_spark_args, create_spark, assemble_spark_config
 
 
 class EngineConstants:

@@ -30,7 +30,7 @@ def add_vocabulary_size_arg(my_parser: argparse.ArgumentParser):
         help="The maximum vocabulary size.")
 
 
-def add_repo2_args(my_parser: argparse.ArgumentParser):
+def add_repo2_args(my_parser: argparse.ArgumentParser, default_packages=None):
     my_parser.add_argument(
         "-r", "--repositories", required=True,
         help="The path to the repositories.")
@@ -39,10 +39,11 @@ def add_repo2_args(my_parser: argparse.ArgumentParser):
     my_parser.add_argument(
         "--graph", help="Write the tree in Graphviz format to this file.")
     my_parser.add_argument(
-        "-l", "--languages", defaukt=all, nargs="+", choices=(
-            "Java", "Python", "JavaScript", "Ruby", "Bash"),
+        "-l", "--languages", required=True, nargs="+",
+        choices=("Java", "Python", "JavaScript", "Ruby", "Bash", "Go"),
+        default=["Java", "Python", "JavaScript", "Ruby", "Bash", "Go"],
         help="The programming languages to analyse.")
-    add_engine_args(my_parser)
+    add_engine_args(my_parser, default_packages)
 
 
 def add_df_args(my_parser: argparse.ArgumentParser):
