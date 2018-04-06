@@ -77,7 +77,7 @@ def pause(func):
 
 
 def pipeline_graph(args, log, root):
-    if args.graph:
+    if hasattr(args, "graph") and args.graph:
         log.info("Dumping the graph to %s", args.graph)
         with open(args.graph, "w") as f:
             root.graph(stream=f)
