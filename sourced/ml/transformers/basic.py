@@ -130,6 +130,7 @@ class LanguageSelector(Transformer):
         self.languages = languages
 
     def __call__(self, files) -> DataFrame:
+        files = files.dropDuplicates(("blob_id",)).filter("is_binary = 'false'")
         classified = files.classify_languages()
         lang_filter = classified.lang == self.languages[0]
         for lang in self.languages[1:]:
