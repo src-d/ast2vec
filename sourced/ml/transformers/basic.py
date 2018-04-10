@@ -62,6 +62,22 @@ class Identity(Transformer):
         return head
 
 
+class Repartitioner(Transformer):
+    def __init__(self, partitions: int, **kwargs):
+        super().__init__(**kwargs)
+        self.partitions = partitions
+
+    def __call__(self, head: RDD):
+        return head.repartition(48)
+
+    @staticmethod
+    def maybe(partitions):
+        if partitions is not None:
+            return Repartitioner(partitions)
+        else:
+            return Identity()
+
+
 class Cacher(Transformer):
     def __init__(self, persistence, **kwargs):
         super().__init__(**kwargs)

@@ -12,7 +12,7 @@ from sourced.ml.cmd_entries import bigartm2asdf_entry, dump_model, projector_ent
     repos2id_sequence_entry
 from sourced.ml.cmd_entries.args import add_df_args, add_feature_args, \
     add_vocabulary_size_arg, add_repo2_args, add_split_stem_arg, \
-    ArgumentDefaultsHelpFormatterNoNone, add_bow_args
+    ArgumentDefaultsHelpFormatterNoNone, add_bow_args, add_repartitioner_arg
 from sourced.ml.cmd_entries.run_swivel import mirror_tf_args
 from sourced.ml.utils import install_bigartm
 
@@ -70,6 +70,7 @@ def get_parser() -> argparse.ArgumentParser:
     add_df_args(repos2coocc_parser)
     add_repo2_args(repos2coocc_parser)
     add_split_stem_arg(repos2coocc_parser)
+    add_repartitioner_arg(repos2coocc_parser)
     repos2coocc_parser.add_argument(
         "-o", "--output", required=True,
         help="[OUT] Path to the Cooccurrences model.")
