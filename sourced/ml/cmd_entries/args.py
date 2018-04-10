@@ -78,3 +78,9 @@ def add_bow_args(my_parser: argparse.ArgumentParser):
     my_parser.add_argument(
         "--batch", default=BOWWriter.DEFAULT_CHUNK_SIZE, type=int,
         help="The maximum size of a single BOW file in bytes.")
+
+def add_repartitioner_arg(my_parser: argparse.ArgumentParser):
+    my_parser.add_argument(
+        "--partitions", required=False, default=None,
+        help="Performs data repartition to specified number of partitions. "
+             "Nothing happens if parameter is unset.")
