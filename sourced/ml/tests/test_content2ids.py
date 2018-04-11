@@ -29,22 +29,24 @@ class Content2IdsTests(unittest.TestCase):
         content2ids = ContentToIdentifiers(split=False)
         ids2dataset = IdentifiersToDataset(idfreq=False)
         for data, result in zip(tfidf_data.datasets, tfidf_data.ids_result):
-            rdd = self.sc.sparkContext \
+            df = self.sc.sparkContext \
                 .parallelize(range(len(data["content"]))) \
                 .map(lambda x: Row(content=data["content"][x], path=str(data["file"][x]),
-                                   repository_id=str(data["document"][x]), lang=data["lang"][x]))
-            rdd_processed = content2ids(rdd)
+                                   repository_id=str(data["document"][x]), lang=data["lang"][x])) \
+                .toDF()
+            rdd_processed = content2ids(df)
             self.assertEqual(result, set(ids2dataset(rdd_processed).collect()))
 
     def test_call_split_idfreq(self):
         content2ids = ContentToIdentifiers(split=True)
         ids2dataset = IdentifiersToDataset(idfreq=True)
         for data, result in zip(tfidf_data.datasets, tfidf_data.ids_split_idfreq_result):
-            rdd = self.sc.sparkContext \
+            df = self.sc.sparkContext \
                 .parallelize(range(len(data["content"]))) \
                 .map(lambda x: Row(content=data["content"][x], path=str(data["file"][x]),
-                                   repository_id=str(data["document"][x]), lang=data["lang"][x]))
-            rdd_processed = content2ids(rdd)
+                                   repository_id=str(data["document"][x]), lang=data["lang"][x])) \
+                .toDF()
+            rdd_processed = content2ids(df)
             self.assertEqual(result, set(ids2dataset(rdd_processed).collect()))
 
     def test_process_row_split(self):
