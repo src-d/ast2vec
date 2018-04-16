@@ -115,6 +115,13 @@ class ProjectorTests(unittest.TestCase):
             os.environ["BROWSER"] = browser
             web_server.stop()
 
+    def test_stop(self):
+        web_server.stop()  # dummy test to avoid partially covered lin in CI
+        assert not web_server.running
+        web_server.start()
+        web_server.stop()
+        assert not web_server.running
+
 
 if __name__ == "__main__":
     unittest.main()
