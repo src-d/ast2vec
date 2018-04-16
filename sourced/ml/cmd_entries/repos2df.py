@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sourced.ml.extractors import create_extractors_from_args
 from sourced.ml.models import OrderedDocumentFrequencies, QuantizationLevels
-from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, \
+from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, LanguageSelector, \
     BagFeatures2DocFreq, HeadFiles, Uast2BagFeatures, Counter, Cacher, Uast2Quant, UastRow2Document
 from sourced.ml.utils import create_engine
 from sourced.ml.utils.engine import pipeline_graph, pause
@@ -18,7 +18,8 @@ def repos2df_entry(args):
     ignition = Ignition(engine, explain=args.explain)
     uast_extractor = ignition \
         .link(HeadFiles()) \
-        .link(UastExtractor(languages=args.languages)) \
+        .link(LanguageSelector(languages=args.languages)) \
+        .link(UastExtractor()) \
         .link(UastRow2Document()) \
         .link(Cacher.maybe(args.persist))
     log.info("Extracting UASTs...")
