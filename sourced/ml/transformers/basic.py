@@ -237,7 +237,7 @@ def create_parquet_loader(session_name, repositories,
     return parquet
 
 
-def create_uast_source(args, session_name, extract_uast=True, select=HeadFiles):
+def create_uast_source(args, session_name, select=HeadFiles):
     if args.parquet:
         start_point = create_parquet_loader(session_name, **args.__dict__)
         root = start_point
@@ -245,7 +245,6 @@ def create_uast_source(args, session_name, extract_uast=True, select=HeadFiles):
         root = create_engine(session_name, **args.__dict__)
         start_point = Ignition(root, explain=args.explain) \
             .link(select()) \
-            .link(LanguageSelector(languages=args.languages))
-        if extract_uast:
-            start_point = start_point.link(UastExtractor())
+            .link(LanguageSelector(languages=args.languages)) \
+            .link(UastExtractor())
     return root, start_point
