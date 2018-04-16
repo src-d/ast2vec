@@ -6,7 +6,8 @@ from pyspark.sql import DataFrame, functions
 
 from sourced.ml.transformers.transformer import Transformer
 from sourced.ml.transformers.uast2bag_features import Uast2BagFeatures
-from sourced.ml.utils import assemble_spark_config, create_spark, EngineConstants, SparkDefault
+from sourced.ml.utils import assemble_spark_config, create_engine, create_spark, EngineConstants, \
+    SparkDefault
 
 
 class CsvSaver(Transformer):
@@ -195,24 +196,6 @@ class ParquetLoader(Transformer):
         raise ValueError
 
 
-def create_parquet_loader(session_name, repositories,
-                          config=SparkDefault.CONFIG,
-                          packages=SparkDefault.PACKAGES,
-                          spark=SparkDefault.MASTER_ADDRESS,
-                          spark_local_dir=SparkDefault.LOCAL_DIR,
-                          spark_log_level=SparkDefault.LOG_LEVEL,
-                          memory=SparkDefault.MEMORY,
-                          dep_zip=False, **_):
-    config = assemble_spark_config(config=config, memory=memory)
-    session = create_spark(session_name, spark=spark, spark_local_dir=spark_local_dir,
-                           config=config, packages=packages, spark_log_level=spark_log_level,
-                           dep_zip=dep_zip)
-    log = logging.getLogger("parquet")
-    log.info("Initializing on %s", repositories)
-    parquet = ParquetLoader(session, repositories)
-    return parquet
-
-
 class UastDeserializer(Transformer):
     def __setstate__(self, state):
         super().__setstate__(state)
@@ -234,3 +217,35 @@ class UastDeserializer(Transformer):
                 self._log.error("\nBabelfish Error: Failed to parse uast for document %s for uast "
                                 "#%s" % (row[Uast2BagFeatures.Columns.document], i))
         yield Row(**row_dict)
+
+
+def create_parquet_loader(session_name, repositories,
+                          config=SparkDefault.CONFIG,
+                          packages=SparkDefault.PACKAGES,
+                          spark=SparkDefault.MASTER_ADDRESS,
+                          spark_local_dir=SparkDefault.LOCAL_DIR,
+                          spark_log_level=SparkDefault.LOG_LEVEL,
+                          memory=SparkDefault.MEMORY,
+                          dep_zip=False, **_):
+    config = assemble_spark_config(config=config, memory=memory)
+    session = create_spark(session_name, spark=spark, spark_local_dir=spark_local_dir,
+                           config=config, packages=packages, spark_log_level=spark_log_level,
+                           dep_zip=dep_zip)
+    log = logging.getLogger("parquet")
+    log.info("Initializing on %s", repositories)
+    parquet = ParquetLoader(session, repositories)
+    return parquet
+
+
+def create_uast_source(args, session_name, extract_uast=True, select=HeadFiles):
+    if args.parquet:
+        start_point = create_parquet_loader(session_name, **args.__dict__)
+        root = start_point
+    else:
+        root = create_engine(session_name, **args.__dict__)
+        start_point = Ignition(root, explain=args.explain) \
+            .link(select()) \
+            .link(LanguageSelector(languages=args.languages))
+        if extract_uast:
+            start_point = start_point.link(UastExtractor())
+    return root, start_point

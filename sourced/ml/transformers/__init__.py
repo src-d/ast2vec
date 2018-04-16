@@ -1,4 +1,4 @@
-from sourced.ml.transformers.basic import Cacher,  Collector, Counter, create_parquet_loader, \
+from sourced.ml.transformers.basic import Cacher,  Collector, Counter, create_uast_source, \
     CsvSaver, FieldsSelector, First, HeadFiles, Identity, Ignition, LanguageSelector, \
     ParquetLoader, ParquetSaver, Rower, Sampler, UastDeserializer, UastExtractor
 from sourced.ml.transformers.indexer import Indexer
