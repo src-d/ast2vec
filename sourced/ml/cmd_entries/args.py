@@ -34,9 +34,6 @@ def add_extractor_args(my_parser: argparse.ArgumentParser):
         "-r", "--repositories", required=True,
         help="The path to the repositories.")
     my_parser.add_argument(
-        "--pause", action="store_true",
-        help="Do not terminate in the end - useful for inspecting Spark Web UI.")
-    my_parser.add_argument(
         "-l", "--languages", required=True, nargs="+", choices=(
             "Java", "Python", "JavaScript", "Ruby", "Bash"),
         help="The programming languages to analyse.")
