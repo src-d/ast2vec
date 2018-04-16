@@ -10,10 +10,9 @@ from sourced.ml.cmd_entries import bigartm2asdf_entry, dump_model, projector_ent
     run_swivel, postprocess_id2vec, preprocess_id2vec, repos2coocc_entry, repos2df_entry, \
     repos2ids_entry, repos2bow_entry, repos2roles_and_ids_entry, repos2id_distance_entry, \
     repos2id_sequence_entry
-from sourced.ml.cmd_entries.args import add_repo2_args, add_feature_args, \
+from sourced.ml.cmd_entries.args import add_bow_args, add_repo2_args, add_feature_args, \
     add_vocabulary_size_arg, add_extractor_args, add_split_stem_arg, \
     ArgumentDefaultsHelpFormatterNoNone
-from sourced.ml.cmd_entries.repos2bow import add_bow_args
 from sourced.ml.cmd_entries.run_swivel import mirror_tf_args
 from sourced.ml.utils import install_bigartm, add_engine_args
 
@@ -30,9 +29,9 @@ def get_parser() -> argparse.ArgumentParser:
     # Create and construct subparsers
     subparsers = parser.add_subparsers(help="Commands", dest="command")
 
-    def add_parser(name, help):
+    def add_parser(name, help_message):
         return subparsers.add_parser(
-            name, help=help, formatter_class=ArgumentDefaultsHelpFormatterNoNone)
+            name, help=help_message, formatter_class=ArgumentDefaultsHelpFormatterNoNone)
 
     # ------------------------------------------------------------------------
     repos2bow_parser = add_parser(
