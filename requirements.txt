@@ -8,4 +8,3 @@ numpy>=1.14
 humanize>=0.5.0,<0.6
 pyspark>=2.2.0,<2.2.1
 pygments>=2.2.0,<3.0
-pip!=9.0.2
