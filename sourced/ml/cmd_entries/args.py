@@ -75,5 +75,3 @@ def add_bow_args(my_parser: argparse.ArgumentParser):
     my_parser.add_argument(
         "--batch", default=BOWWriter.DEFAULT_CHUNK_SIZE, type=int,
         help="The maximum size of a single BOW file in bytes.")
-    my_parser.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
