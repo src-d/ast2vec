@@ -2,7 +2,7 @@ import argparse
 import json
 
 from sourced.ml import extractors
-from sourced.ml.transformers import Moder
+from sourced.ml.transformers import BOWWriter, Moder
 
 
 class ArgumentDefaultsHelpFormatterNoNone(argparse.ArgumentDefaultsHelpFormatter):
@@ -69,3 +69,13 @@ def add_feature_args(my_parser: argparse.ArgumentParser, required=True):
             my_parser.add_argument(
                 "--%s-%s" % (ex.NAME, opt), default=val, type=json.loads,
                 help="%s's kwarg" % ex.__name__)
+
+
+def add_bow_args(my_parser: argparse.ArgumentParser):
+    my_parser.add_argument(
+        "--bow", required=True, help="[OUT] The path to the Bag-Of-Words model.")
+    my_parser.add_argument(
+        "--batch", default=BOWWriter.DEFAULT_CHUNK_SIZE, type=int,
+        help="The maximum size of a single BOW file in bytes.")
+    my_parser.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
