@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sourced.ml.extractors import IdentifierDistance
 from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, \
-    HeadFiles, Uast2BagFeatures, Cacher, UastRow2Document, CsvSaver
+    HeadFiles, Uast2BagFeatures, Cacher, UastRow2Document, CsvSaver, LanguageSelector
 from sourced.ml.transformers.basic import Rower
 from sourced.ml.utils import create_engine
 from sourced.ml.utils.engine import pause
@@ -16,7 +16,8 @@ def repos2id_distance_entry(args):
 
     Ignition(engine, explain=args.explain) \
         .link(HeadFiles()) \
-        .link(UastExtractor(languages=args.languages)) \
+        .link(LanguageSelector(languages=args.languages)) \
+        .link(UastExtractor()) \
         .link(UastRow2Document()) \
         .link(Cacher.maybe(args.persist)) \
         .link(UastDeserializer()) \

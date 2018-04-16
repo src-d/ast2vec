@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from sourced.ml.transformers import Ignition, ContentToIdentifiers, \
-    ContentExtractor, IdentifiersToDataset, HeadFiles, Cacher, CsvSaver
+    LanguageSelector, IdentifiersToDataset, HeadFiles, Cacher, CsvSaver
 from sourced.ml.utils import create_engine
 from sourced.ml.utils.engine import pause
 
@@ -12,7 +12,7 @@ def repos2ids_entry(args):
 
     Ignition(engine) \
         .link(HeadFiles()) \
-        .link(ContentExtractor()) \
+        .link(LanguageSelector(languages=args.languages)) \
         .link(ContentToIdentifiers(args.split)) \
         .link(Cacher.maybe(args.persist)) \
         .link(IdentifiersToDataset(args.idfreq)) \

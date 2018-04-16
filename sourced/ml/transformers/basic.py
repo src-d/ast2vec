@@ -1,12 +1,12 @@
 import logging
 from typing import Union
 
-from pyspark import StorageLevel, Row, RDD
+from pyspark import RDD, Row, StorageLevel
 from pyspark.sql import DataFrame
 
 from sourced.ml.transformers.transformer import Transformer
 from sourced.ml.transformers.uast2bag_features import Uast2BagFeatures
-from sourced.ml.utils import EngineConstants, assemble_spark_config, create_spark
+from sourced.ml.utils import assemble_spark_config, create_spark, EngineConstants
 
 
 class CsvSaver(Transformer):
@@ -124,7 +124,7 @@ class Counter(Transformer):
         return head.countApproxDistinct()
 
 
-class UastExtractor(Transformer):
+class LanguageSelector(Transformer):
     def __init__(self, languages: Union[list, tuple], **kwargs):
         super().__init__(**kwargs)
         self.languages = languages
@@ -136,9 +136,16 @@ class UastExtractor(Transformer):
         for lang in self.languages[1:]:
             lang_filter |= classified.lang == lang
         filtered_by_lang = classified.filter(lang_filter)
+        return filtered_by_lang
+
+
+class UastExtractor(Transformer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __call__(self, files: DataFrame) -> DataFrame:
         from pyspark.sql import functions
-        uasts = filtered_by_lang.extract_uasts().where(functions.size(functions.col("uast")) > 0)
-        return uasts
+        return files.extract_uasts().where(functions.size(functions.col("uast")) > 0)
 
 
 class FieldsSelector(Transformer):
