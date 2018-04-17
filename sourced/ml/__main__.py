@@ -10,11 +10,11 @@ from sourced.ml.cmd_entries import bigartm2asdf_entry, dump_model, projector_ent
     run_swivel, postprocess_id2vec, preprocess_id2vec, repos2coocc_entry, repos2df_entry, \
     repos2ids_entry, repos2bow_entry, repos2roles_and_ids_entry, repos2id_distance_entry, \
     repos2id_sequence_entry
-from sourced.ml.cmd_entries.args import add_bow_args, add_repo2_args, add_feature_args, \
-    add_vocabulary_size_arg, add_extractor_args, add_split_stem_arg, \
-    ArgumentDefaultsHelpFormatterNoNone
+from sourced.ml.cmd_entries.args import add_df_args, add_feature_args, \
+    add_vocabulary_size_arg, add_repo2_args, add_split_stem_arg, \
+    ArgumentDefaultsHelpFormatterNoNone, add_bow_args
 from sourced.ml.cmd_entries.run_swivel import mirror_tf_args
-from sourced.ml.utils import install_bigartm, add_engine_args
+from sourced.ml.utils import install_bigartm
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -37,97 +37,77 @@ def get_parser() -> argparse.ArgumentParser:
     repos2bow_parser = add_parser(
         "repos2bow", "Convert source code to the bag-of-words model.")
     repos2bow_parser.set_defaults(handler=repos2bow_entry)
+    add_df_args(repos2bow_parser)
     add_repo2_args(repos2bow_parser)
-    add_engine_args(repos2bow_parser)
-    add_bow_args(repos2bow_parser)
     add_feature_args(repos2bow_parser)
-    repos2bow_parser.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
+    add_bow_args(repos2bow_parser)
     # ------------------------------------------------------------------------
     repos2df_parser = add_parser(
         "repos2df", "Calculate document frequencies of features extracted from source code.")
     repos2df_parser.set_defaults(handler=repos2df_entry)
+    add_df_args(repos2df_parser)
     add_repo2_args(repos2df_parser)
-    add_engine_args(repos2df_parser)
     add_feature_args(repos2df_parser)
-    repos2df_parser.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2ids_parser = subparsers.add_parser(
         "repos2ids", help="Convert source code to a bag of identifiers.")
     repos2ids_parser.set_defaults(handler=repos2ids_entry)
-    add_engine_args(repos2ids_parser)
-    repos2ids_parser.add_argument(
-        "-r", "--repositories", required=True,
-        help="The path to the repositories.")
+    add_repo2_args(repos2ids_parser)
+    add_split_stem_arg(repos2ids_parser)
     repos2ids_parser.add_argument(
         "-o", "--output", required=True,
         help="[OUT] output path to the CSV file with identifiers.")
-    repos2ids_parser.add_argument(
-        "--split", action="store_true",
-        help="Enables filtering identifiers that are splittable"
-             "based on special characters or case changes.")
     repos2ids_parser.add_argument(
         "--idfreq", action="store_true",
         help="Adds identifier frequencies to the output CSV file."
              "num_repos is the number of repositories where the identifier appears in."
              "num_files is the number of files where the identifier appears in."
              "num_occ is the total number of occurences of the identifier.")
-    repos2ids_parser.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2coocc_parser = add_parser(
         "repos2coocc", "Convert source code to the sparse co-occurrence matrix of identifiers.")
     repos2coocc_parser.set_defaults(handler=repos2coocc_entry)
-    add_engine_args(repos2coocc_parser)
-    add_repo2_args(repos2coocc_parser, quant=False)
+    add_df_args(repos2coocc_parser)
+    add_repo2_args(repos2coocc_parser)
     add_split_stem_arg(repos2coocc_parser)
     repos2coocc_parser.add_argument(
         "-o", "--output", required=True,
         help="[OUT] Path to the Cooccurrences model.")
-    repos2coocc_parser.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
+
     # ------------------------------------------------------------------------
     repos2roles_and_ids = add_parser(
         "repos2roles_ids", "Converts a UAST to a list of pairs, where pair is a role and "
         "identifier. Role is merged generic roles where identifier was found.")
     repos2roles_and_ids.set_defaults(handler=repos2roles_and_ids_entry)
-    add_engine_args(repos2roles_and_ids)
-    add_extractor_args(repos2roles_and_ids)
+    add_repo2_args(repos2roles_and_ids)
     add_split_stem_arg(repos2roles_and_ids)
     repos2roles_and_ids.add_argument(
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark should store the result. "
              "Inside the direcory you find result is csv format, status file and sumcheck files.")
-    repos2roles_and_ids.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2identifier_distance = add_parser(
         "repos2id_distance", "Converts a UAST to a list of identifier pairs "
                              "and distance between them.")
     repos2identifier_distance.set_defaults(handler=repos2id_distance_entry)
-    add_engine_args(repos2identifier_distance)
-    add_extractor_args(repos2identifier_distance)
+    add_repo2_args(repos2identifier_distance)
     add_split_stem_arg(repos2identifier_distance)
     repos2identifier_distance.add_argument(
         "-t", "--type", required=True, choices=IdentifierDistance.DistanceType.All,
         help="Distance type.")
     repos2identifier_distance.add_argument(
-        "--max-distance", default=IdentifierDistance.DEFAULT_MAX_DISTANCE, type=int,
+        "--max-distance", default=IdentifierDistance.DEFAULT_MAX_DISTANCE,
         help="Maximum distance to save.")
     repos2identifier_distance.add_argument(
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark should store the result. "
              "Inside the direcory you find result is csv format, status file and sumcheck files.")
-    repos2identifier_distance.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2id_sequence = add_parser(
         "repos2id_sequence", "Converts a UAST to sequence of identifiers sorted by "
                              "order of appearance.")
     repos2id_sequence.set_defaults(handler=repos2id_sequence_entry)
-    add_engine_args(repos2id_sequence)
-    add_extractor_args(repos2id_sequence)
+    add_repo2_args(repos2id_sequence)
     add_split_stem_arg(repos2id_sequence)
     repos2id_sequence.add_argument(
         "--skip-docname", default=False, action="store_true",
@@ -136,8 +116,6 @@ def get_parser() -> argparse.ArgumentParser:
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark should store the result. "
              "Inside the direcory you find result is csv format, status file and sumcheck files.")
-    repos2id_sequence.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     preproc_parser = add_parser(
         "id2vec_preproc", "Convert a sparse co-occurrence matrix to the Swivel shards.")

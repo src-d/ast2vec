@@ -3,6 +3,7 @@ import json
 
 from sourced.ml import extractors
 from sourced.ml.transformers import BOWWriter, Moder
+from sourced.ml.utils import add_engine_args
 
 
 class ArgumentDefaultsHelpFormatterNoNone(argparse.ArgumentDefaultsHelpFormatter):
@@ -29,35 +30,37 @@ def add_vocabulary_size_arg(my_parser: argparse.ArgumentParser):
         help="The maximum vocabulary size.")
 
 
-def add_extractor_args(my_parser: argparse.ArgumentParser):
+def add_repo2_args(my_parser: argparse.ArgumentParser, default_packages=None):
     my_parser.add_argument(
         "-r", "--repositories", required=True,
         help="The path to the repositories.")
     my_parser.add_argument(
-        "-l", "--languages", required=True, nargs="+", choices=(
-            "Java", "Python", "JavaScript", "Ruby", "Bash"),
-        help="The programming languages to analyse.")
-
-
-def add_repo2_args(my_parser: argparse.ArgumentParser, quant=True):
-    add_extractor_args(my_parser)
+        "--parquet", action="store_true", help="If it's parquet input.")
     my_parser.add_argument(
         "--graph", help="Write the tree in Graphviz format to this file.")
     my_parser.add_argument(
+        "-l", "--languages", required=True, nargs="+",
+        choices=("Java", "Python", "JavaScript", "Ruby", "Bash", "Go"),
+        default=["Java", "Python", "JavaScript", "Ruby", "Bash", "Go"],
+        help="The programming languages to analyse.")
+    add_engine_args(my_parser, default_packages)
+
+
+def add_df_args(my_parser: argparse.ArgumentParser):
+    my_parser.add_argument(
         "--min-docfreq", default=1, type=int,
         help="The minimum document frequency of each feature.")
-    add_vocabulary_size_arg(my_parser)
     my_parser.add_argument(
         "--docfreq", required=True,
         help="[OUT] The path to the OrderedDocumentFrequencies model.")
-    if quant:
-        my_parser.add_argument(
-            "--quant", help="[OUT] The path to the QuantizationLevels model.")
+    add_vocabulary_size_arg(my_parser)
 
 
 def add_feature_args(my_parser: argparse.ArgumentParser, required=True):
     my_parser.add_argument("-x", "--mode", choices=Moder.Options.__all__,
                            default="file", help="What to select for analysis.")
+    my_parser.add_argument(
+        "--quant", help="[OUT] The path to the QuantizationLevels model.")
     my_parser.add_argument(
         "-f", "--feature", nargs="+",
         choices=[ex.NAME for ex in extractors.__extractors__.values()],
