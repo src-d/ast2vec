@@ -3,22 +3,19 @@ from uuid import uuid4
 
 from sourced.ml.extractors import create_extractors_from_args
 from sourced.ml.models import OrderedDocumentFrequencies, QuantizationLevels
-from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, \
-    BagFeatures2DocFreq, HeadFiles, Uast2BagFeatures, Counter, Cacher, Uast2Quant, UastRow2Document
-from sourced.ml.utils import create_engine
-from sourced.ml.utils.engine import pipeline_graph, pause
+from sourced.ml.transformers import BagFeatures2DocFreq, Cacher, Counter, create_uast_source, \
+    UastDeserializer, UastRow2Document, Uast2BagFeatures, Uast2Quant
+from sourced.ml.utils import pipeline_graph, pause
 
 
 @pause
 def repos2df_entry(args):
     log = logging.getLogger("repos2df")
-    engine = create_engine("repos2df-%s" % uuid4(), **args.__dict__)
+    session_name = "repos2df-%s" % uuid4()
     extractors = create_extractors_from_args(args)
+    root, start_point = create_uast_source(args, session_name)
 
-    ignition = Ignition(engine, explain=args.explain)
-    uast_extractor = ignition \
-        .link(HeadFiles()) \
-        .link(UastExtractor(languages=args.languages)) \
+    uast_extractor = start_point \
         .link(UastRow2Document()) \
         .link(Cacher.maybe(args.persist))
     log.info("Extracting UASTs...")
@@ -36,4 +33,4 @@ def repos2df_entry(args):
         .execute()
     log.info("Writing %s", args.docfreq)
     OrderedDocumentFrequencies().construct(ndocs, df).save(args.docfreq)
-    pipeline_graph(args, log, ignition)
+    pipeline_graph(args, log, root)

@@ -52,6 +52,9 @@ def add_spark_args(my_parser, default_packages=None):
     my_parser.add_argument(
         "--persist", default=None, choices=persistences,
         help="Spark persistence type (StorageLevel.*).")
+    my_parser.add_argument(
+        "--pause", action="store_true",
+        help="Do not terminate in the end - useful for inspecting Spark Web UI.")
 
 
 def create_spark(session_name,

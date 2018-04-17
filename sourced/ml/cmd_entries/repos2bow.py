@@ -1,24 +1,12 @@
-import argparse
 import logging
 from uuid import uuid4
 
 from sourced.ml.extractors import create_extractors_from_args
 from sourced.ml.models import OrderedDocumentFrequencies, QuantizationLevels
-from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, Uast2Quant, \
-    BagFeatures2DocFreq, BagFeatures2TermFreq, Uast2BagFeatures, HeadFiles, TFIDF, Cacher, \
-    Indexer, UastRow2Document, BOWWriter, Moder, create_parquet_loader
-from sourced.ml.utils import create_engine
-from sourced.ml.utils.engine import pipeline_graph, pause
-
-
-def add_bow_args(my_parser: argparse.ArgumentParser):
-    my_parser.add_argument(
-        "--bow", required=True, help="[OUT] The path to the Bag-Of-Words model.")
-    my_parser.add_argument(
-        "--batch", default=BOWWriter.DEFAULT_CHUNK_SIZE, type=int,
-        help="The maximum size of a single BOW file in bytes.")
-    my_parser.add_argument(
-        "--parquet", action="store_true", help="If it's parquet input.")
+from sourced.ml.transformers import BagFeatures2DocFreq, BagFeatures2TermFreq, BOWWriter, \
+    Cacher, create_uast_source, HeadFiles, Indexer, Moder, TFIDF, UastDeserializer, \
+    UastRow2Document, Uast2Quant, Uast2BagFeatures
+from sourced.ml.utils import pause, pipeline_graph
 
 
 @pause
@@ -26,19 +14,9 @@ def repos2bow_entry_template(args, select=HeadFiles, cache_hook=None, save_hook=
     log = logging.getLogger("repos2bow")
     extractors = create_extractors_from_args(args)
     session_name = "repos2bow-%s" % uuid4()
-    if args.parquet:
-        start_point = create_parquet_loader(session_name, **args.__dict__)
-        root = start_point
-    else:
-        engine = create_engine(session_name, **args.__dict__)
-        root = engine
-
-        start_point = Ignition(engine, explain=args.explain) \
-            .link(select()) \
-            .link(UastExtractor(languages=args.languages))
+    root, start_point = create_uast_source(args, session_name, select=select)
 
     uast_extractor = start_point.link(Moder(args.mode)).link(Cacher.maybe(args.persist))
-
     if cache_hook is not None:
         uast_extractor.link(cache_hook()).execute()
     # We link UastRow2Document after Cacher here because cache_hook() may want to have all possible

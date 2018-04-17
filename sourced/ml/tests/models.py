@@ -18,3 +18,5 @@ SOURCE = join(DATA_DIR_SOURCE, "%s.asdf" % SOURCE_FILENAME)
 SOURCE_PY = join(DATA_DIR_SOURCE, "%s.py" % SOURCE_FILENAME)
 
 TOPICS_SRC = "topics_readable.txt"
+
+PARQUET_DIR = join(_root, "parquet")

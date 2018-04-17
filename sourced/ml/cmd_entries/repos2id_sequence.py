@@ -1,31 +1,25 @@
 import logging
 from uuid import uuid4
 
-from pyspark import Row
-
 from sourced.ml.extractors import IdSequenceExtractor
-from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, \
-    HeadFiles, Uast2BagFeatures, Cacher, UastRow2Document, CsvSaver
-from sourced.ml.transformers.basic import Rower
-from sourced.ml.utils import create_engine
-from sourced.ml.utils.engine import pause
+from sourced.ml.transformers import Cacher, CsvSaver, Rower, create_uast_source, \
+    UastDeserializer, UastRow2Document, Uast2BagFeatures
+from sourced.ml.utils import pause, pipeline_graph
 
 
 @pause
 def repos2id_sequence_entry(args):
-    log = logging.getLogger("repos2id_distance")
-    engine = create_engine("repos2id_distance-%s" % uuid4(), **args.__dict__)
+    log = logging.getLogger("repos2id_sequence")
+    session_name = "repos2id_distance-%s" % uuid4()
     extractors = [IdSequenceExtractor(args.split)]
+    root, start_point = create_uast_source(args, session_name)
     if not args.skip_docname:
         mapper = Rower(lambda x: dict(document=x[0][1],
                                       identifiers=x[0][0]))
     else:
         mapper = Rower(lambda x: dict(identifiers=x[0][0]))
 
-    ignition = Ignition(engine, explain=args.explain)
-    ignition \
-        .link(HeadFiles()) \
-        .link(UastExtractor(languages=args.languages)) \
+    start_point \
         .link(UastRow2Document()) \
         .link(Cacher.maybe(args.persist)) \
         .link(UastDeserializer()) \
@@ -33,3 +27,4 @@ def repos2id_sequence_entry(args):
         .link(mapper) \
         .link(CsvSaver(args.output)) \
         .execute()
+    pipeline_graph(args, log, root)

@@ -34,8 +34,7 @@ setup(
                       "pyspark>=2.2.0,<2.2.1",
                       "humanize>=0.5.0",
                       "parquet>=1.2,<2.0",
-                      "pygments>=2.2.0,<3.0",
-                      "pip!=9.0.2"] + typing,
+                      "pygments>=2.2.0,<3.0"] + typing,
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0,<2.0"],
