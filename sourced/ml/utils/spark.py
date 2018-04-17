@@ -55,6 +55,8 @@ def add_spark_args(my_parser, default_packages=None):
     my_parser.add_argument(
         "--pause", action="store_true",
         help="Do not terminate in the end - useful for inspecting Spark Web UI.")
+    my_parser.add_argument("--explain", action="store_true",
+                           help="Print the PySpark execution plans.")
 
 
 def create_spark(session_name,
