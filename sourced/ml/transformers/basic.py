@@ -1,12 +1,13 @@
 import logging
 from typing import Union
 
-from pyspark import StorageLevel, Row, RDD
-from pyspark.sql import DataFrame
+from pyspark import RDD, Row, StorageLevel
+from pyspark.sql import DataFrame, functions
 
 from sourced.ml.transformers.transformer import Transformer
 from sourced.ml.transformers.uast2bag_features import Uast2BagFeatures
-from sourced.ml.utils import EngineConstants, assemble_spark_config, create_spark
+from sourced.ml.utils import assemble_spark_config, create_engine, create_spark, EngineConstants, \
+    SparkDefault
 
 
 class CsvSaver(Transformer):
@@ -124,21 +125,33 @@ class Counter(Transformer):
         return head.countApproxDistinct()
 
 
-class UastExtractor(Transformer):
-    def __init__(self, languages: Union[list, tuple], **kwargs):
+class LanguageSelector(Transformer):
+    def __init__(self, languages: Union[list, tuple], blacklist=False, **kwargs):
         super().__init__(**kwargs)
         self.languages = languages
+        self.blacklist = blacklist
 
     def __call__(self, files: DataFrame) -> DataFrame:
         files = files.dropDuplicates(("blob_id",)).filter("is_binary = 'false'")
         classified = files.classify_languages()
-        lang_filter = classified.lang == self.languages[0]
-        for lang in self.languages[1:]:
-            lang_filter |= classified.lang == lang
+        if not self.blacklist:
+            lang_filter = classified.lang == self.languages[0]
+            for lang in self.languages[1:]:
+                lang_filter |= classified.lang == lang
+        else:
+            lang_filter = classified.lang != self.languages[0]
+            for lang in self.languages[1:]:
+                lang_filter &= classified.lang != lang
         filtered_by_lang = classified.filter(lang_filter)
-        from pyspark.sql import functions
-        uasts = filtered_by_lang.extract_uasts().where(functions.size(functions.col("uast")) > 0)
-        return uasts
+        return filtered_by_lang
+
+
+class UastExtractor(Transformer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __call__(self, files: DataFrame) -> DataFrame:
+        return files.extract_uasts().where(functions.size(functions.col("uast")) > 0)
 
 
 class FieldsSelector(Transformer):
@@ -183,17 +196,6 @@ class ParquetLoader(Transformer):
         raise ValueError
 
 
-def create_parquet_loader(session_name, repositories, config=None, memory="", packages=None,
-                          **spark_kwargs):
-    config, packages = assemble_spark_config(config=config, packages=packages, memory=memory)
-    session = create_spark(session_name, config=config, packages=packages,
-                           **spark_kwargs)
-    log = logging.getLogger("parquet")
-    log.info("Initializing on %s", repositories)
-    parquet = ParquetLoader(session, repositories)
-    return parquet
-
-
 class UastDeserializer(Transformer):
     def __setstate__(self, state):
         super().__setstate__(state)
@@ -215,3 +217,34 @@ class UastDeserializer(Transformer):
                 self._log.error("\nBabelfish Error: Failed to parse uast for document %s for uast "
                                 "#%s" % (row[Uast2BagFeatures.Columns.document], i))
         yield Row(**row_dict)
+
+
+def create_parquet_loader(session_name, repositories,
+                          config=SparkDefault.CONFIG,
+                          packages=SparkDefault.PACKAGES,
+                          spark=SparkDefault.MASTER_ADDRESS,
+                          spark_local_dir=SparkDefault.LOCAL_DIR,
+                          spark_log_level=SparkDefault.LOG_LEVEL,
+                          memory=SparkDefault.MEMORY,
+                          dep_zip=False, **_):
+    config = assemble_spark_config(config=config, memory=memory)
+    session = create_spark(session_name, spark=spark, spark_local_dir=spark_local_dir,
+                           config=config, packages=packages, spark_log_level=spark_log_level,
+                           dep_zip=dep_zip)
+    log = logging.getLogger("parquet")
+    log.info("Initializing on %s", repositories)
+    parquet = ParquetLoader(session, repositories)
+    return parquet
+
+
+def create_uast_source(args, session_name, select=HeadFiles):
+    if args.parquet:
+        start_point = create_parquet_loader(session_name, **args.__dict__)
+        root = start_point
+    else:
+        root = create_engine(session_name, **args.__dict__)
+        start_point = Ignition(root, explain=args.explain) \
+            .link(select()) \
+            .link(LanguageSelector(languages=args.languages)) \
+            .link(UastExtractor())
+    return root, start_point

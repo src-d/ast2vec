@@ -2,21 +2,19 @@ import logging
 from uuid import uuid4
 
 from sourced.ml.extractors import IdentifierDistance
-from sourced.ml.transformers import Ignition, UastExtractor, UastDeserializer, \
-    HeadFiles, Uast2BagFeatures, Cacher, UastRow2Document, CsvSaver
-from sourced.ml.transformers.basic import Rower
-from sourced.ml.utils import create_engine
-from sourced.ml.utils.engine import pause
+from sourced.ml.transformers import Cacher, CsvSaver, create_uast_source, Rower, \
+    UastDeserializer, UastRow2Document, Uast2BagFeatures
+from sourced.ml.utils import pause, pipeline_graph
 
 
 @pause
 def repos2id_distance_entry(args):
-    engine = create_engine("repos2id_distance-%s" % uuid4(), **args.__dict__)
+    log = logging.getLogger("repos2id_distance")
+    session_name = "repos2id_distance-%s" % uuid4()
     extractors = [IdentifierDistance(args.split, args.type, args.max_distance)]
+    root, start_point = create_uast_source(args, session_name)
 
-    Ignition(engine, explain=args.explain) \
-        .link(HeadFiles()) \
-        .link(UastExtractor(languages=args.languages)) \
+    start_point \
         .link(UastRow2Document()) \
         .link(Cacher.maybe(args.persist)) \
         .link(UastDeserializer()) \
@@ -26,3 +24,4 @@ def repos2id_distance_entry(args):
                                    distance=x[1]))) \
         .link(CsvSaver(args.output)) \
         .execute()
+    pipeline_graph(args, log, root)

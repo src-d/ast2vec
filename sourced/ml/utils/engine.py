@@ -3,7 +3,8 @@ import logging
 import requests
 from pkg_resources import get_distribution, DistributionNotFound
 from sourced.engine import Engine
-from sourced.ml.utils.spark import add_spark_args, assemble_spark_config, create_spark
+from sourced.ml.utils.spark import add_spark_args, assemble_spark_config, create_spark, \
+    SparkDefault
 
 
 class EngineConstants:
@@ -42,11 +43,11 @@ def add_bblfsh_dependencies(bblfsh, config=None):
     config.append("spark.tech.sourced.bblfsh.grpc.host=" + bblfsh)
 
 
-def create_engine(session_name, repositories,
-                  bblfsh=None,
-                  engine=None,
-                  config=None, packages=None, memory="",
-                  repository_format="siva", **spark_kwargs):
+def create_engine(session_name, repositories, repository_format="siva", bblfsh=None,
+                  engine=None, config=SparkDefault.CONFIG, packages=SparkDefault.PACKAGES,
+                  spark=SparkDefault.MASTER_ADDRESS, spark_local_dir=SparkDefault.LOCAL_DIR,
+                  spark_log_level=SparkDefault.LOG_LEVEL, memory=SparkDefault.MEMORY,
+                  dep_zip=False, **_):
     if not bblfsh:
         bblfsh = "localhost"
     if not engine:
@@ -58,10 +59,12 @@ def create_engine(session_name, repositories,
                 .json()["tag_name"].replace("v", "")
             log.warning("Engine not found, queried GitHub to get the latest release tag (%s)",
                         engine)
-    config, packages = assemble_spark_config(config=config, packages=packages, memory=memory)
+    config = assemble_spark_config(config=config, memory=memory)
     add_engine_dependencies(engine=engine, config=config, packages=packages)
     add_bblfsh_dependencies(bblfsh=bblfsh, config=config)
-    session = create_spark(session_name, config=config, packages=packages, **spark_kwargs)
+    session = create_spark(session_name, spark=spark, spark_local_dir=spark_local_dir,
+                           config=config, packages=packages, spark_log_level=spark_log_level,
+                           dep_zip=dep_zip)
     log = logging.getLogger("engine")
     log.info("Initializing on %s", repositories)
     engine = Engine(session, repositories, repository_format)

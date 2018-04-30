@@ -10,10 +10,9 @@ from sourced.ml.cmd_entries import bigartm2asdf_entry, dump_model, projector_ent
     run_swivel, postprocess_id2vec, preprocess_id2vec, repos2coocc_entry, repos2df_entry, \
     repos2ids_entry, repos2bow_entry, repos2roles_and_ids_entry, repos2id_distance_entry, \
     repos2id_sequence_entry
-from sourced.ml.cmd_entries.args import add_repo2_args, add_feature_args, \
+from sourced.ml.cmd_entries.args import add_bow_args, add_repo2_args, add_feature_args, \
     add_vocabulary_size_arg, add_extractor_args, add_split_stem_arg, \
     ArgumentDefaultsHelpFormatterNoNone
-from sourced.ml.cmd_entries.repos2bow import add_bow_args
 from sourced.ml.cmd_entries.run_swivel import mirror_tf_args
 from sourced.ml.utils import install_bigartm, add_engine_args
 
@@ -30,9 +29,9 @@ def get_parser() -> argparse.ArgumentParser:
     # Create and construct subparsers
     subparsers = parser.add_subparsers(help="Commands", dest="command")
 
-    def add_parser(name, help):
+    def add_parser(name, help_message):
         return subparsers.add_parser(
-            name, help=help, formatter_class=ArgumentDefaultsHelpFormatterNoNone)
+            name, help=help_message, formatter_class=ArgumentDefaultsHelpFormatterNoNone)
 
     # ------------------------------------------------------------------------
     repos2bow_parser = add_parser(
@@ -42,6 +41,8 @@ def get_parser() -> argparse.ArgumentParser:
     add_engine_args(repos2bow_parser)
     add_bow_args(repos2bow_parser)
     add_feature_args(repos2bow_parser)
+    repos2bow_parser.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2df_parser = add_parser(
         "repos2df", "Calculate document frequencies of features extracted from source code.")
@@ -49,6 +50,8 @@ def get_parser() -> argparse.ArgumentParser:
     add_repo2_args(repos2df_parser)
     add_engine_args(repos2df_parser)
     add_feature_args(repos2df_parser)
+    repos2df_parser.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2ids_parser = subparsers.add_parser(
         "repos2ids", help="Convert source code to a bag of identifiers.")
@@ -70,6 +73,8 @@ def get_parser() -> argparse.ArgumentParser:
              "num_repos is the number of repositories where the identifier appears in."
              "num_files is the number of files where the identifier appears in."
              "num_occ is the total number of occurences of the identifier.")
+    repos2ids_parser.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2coocc_parser = add_parser(
         "repos2coocc", "Convert source code to the sparse co-occurrence matrix of identifiers.")
@@ -80,6 +85,8 @@ def get_parser() -> argparse.ArgumentParser:
     repos2coocc_parser.add_argument(
         "-o", "--output", required=True,
         help="[OUT] Path to the Cooccurrences model.")
+    repos2coocc_parser.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2roles_and_ids = add_parser(
         "repos2roles_ids", "Converts a UAST to a list of pairs, where pair is a role and "
@@ -92,6 +99,8 @@ def get_parser() -> argparse.ArgumentParser:
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark should store the result. "
              "Inside the direcory you find result is csv format, status file and sumcheck files.")
+    repos2roles_and_ids.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2identifier_distance = add_parser(
         "repos2id_distance", "Converts a UAST to a list of identifier pairs "
@@ -110,6 +119,8 @@ def get_parser() -> argparse.ArgumentParser:
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark should store the result. "
              "Inside the direcory you find result is csv format, status file and sumcheck files.")
+    repos2identifier_distance.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     repos2id_sequence = add_parser(
         "repos2id_sequence", "Converts a UAST to sequence of identifiers sorted by "
@@ -125,6 +136,8 @@ def get_parser() -> argparse.ArgumentParser:
         "-o", "--output", required=True,
         help="[OUT] Path to the directory where spark should store the result. "
              "Inside the direcory you find result is csv format, status file and sumcheck files.")
+    repos2id_sequence.add_argument(
+        "--parquet", action="store_true", help="If it's parquet input.")
     # ------------------------------------------------------------------------
     preproc_parser = add_parser(
         "id2vec_preproc", "Convert a sparse co-occurrence matrix to the Swivel shards.")

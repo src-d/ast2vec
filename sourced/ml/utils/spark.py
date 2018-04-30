@@ -19,6 +19,7 @@ class SparkDefault:
     LOG_LEVEL = "WARN"
     CONFIG = []
     PACKAGES = []
+    MEMORY = ""
 
 
 def add_spark_args(my_parser, default_packages=None):
@@ -29,7 +30,7 @@ def add_spark_args(my_parser, default_packages=None):
         "--config", nargs="+", default=SparkDefault.CONFIG,
         help="Spark configuration (key=value).")
     my_parser.add_argument(
-        "-m", "--memory",
+        "-m", "--memory", default=SparkDefault.MEMORY,
         help="Handy memory config for spark. -m 4G,10G,2G is equivalent to "
              "--config spark.executor.memory=4G "
              "--config spark.driver.memory=10G "
@@ -63,7 +64,7 @@ def create_spark(session_name,
                  config=SparkDefault.CONFIG,
                  packages=SparkDefault.PACKAGES,
                  spark_log_level=SparkDefault.LOG_LEVEL,
-                 dep_zip=False):  # **kwargs are discarded for convenience
+                 dep_zip=False):
     log = logging.getLogger("spark")
     log.info("Starting %s on %s", session_name, spark)
     builder = SparkSession.builder.master(spark).appName(session_name)
@@ -90,7 +91,7 @@ def create_spark(session_name,
     return session
 
 
-def assemble_spark_config(config=None, packages=None, memory: str = ""):
+def assemble_spark_config(config=SparkDefault.CONFIG, memory=SparkDefault.MEMORY):
     """
     Assemble configuration for a Spark session
     :param config: configuration to send to spark session
@@ -98,10 +99,6 @@ def assemble_spark_config(config=None, packages=None, memory: str = ""):
     :param memory: string with memory configuration for spark
     :return: config, packages
     """
-    if config is None:
-        config = []
-    if packages is None:
-        packages = []
     memory_conf = []
     if memory:
         memory = memory.split(",")
@@ -112,4 +109,4 @@ def assemble_spark_config(config=None, packages=None, memory: str = ""):
         memory_conf.append("spark.driver.memory=" + memory[1])
         memory_conf.append("spark.driver.maxResultSize=" + memory[2])
         config = config + memory_conf
-    return config, packages
+    return config
