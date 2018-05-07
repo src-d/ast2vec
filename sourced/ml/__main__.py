@@ -13,6 +13,7 @@ from sourced.ml.cmd_entries import bigartm2asdf_entry, dump_model, projector_ent
 from sourced.ml.cmd_entries.args import add_df_args, add_feature_args, add_split_stem_arg, \
     add_vocabulary_size_arg, add_repo2_args, add_bow_args, ArgumentDefaultsHelpFormatterNoNone
 from sourced.ml.cmd_entries.run_swivel import mirror_tf_args
+from sourced.ml.cmd_entries import add_id_splitter_arguments
 from sourced.ml.utils import install_bigartm
 
 
@@ -188,6 +189,10 @@ def get_parser() -> argparse.ArgumentParser:
         "input", help="Path to the model file, URL or UUID.")
     dump_parser.add_argument("--gcs", default=None, dest="gcs_bucket",
                              help="GCS bucket to use.")
+    # ------------------------------------------------------------------------
+    id_splitter_parser = add_parser(
+        "id_split", "Train identifier splitter.")
+    add_id_splitter_arguments(id_splitter_parser)
 
     return parser
 
