@@ -4,6 +4,7 @@ _root = dirname(__file__)
 _models_path = join(_root, "asdf")
 
 ID2VEC = join(_models_path, "id2vec_1000.asdf")
+GRAPHDEF = join(_models_path, "graph_def.asdf")
 DOCFREQ = join(_models_path, "docfreq_1000.asdf")
 QUANTLEVELS = join(_models_path, "quant.asdf")
 BOW = join(_models_path, "bow.asdf")
