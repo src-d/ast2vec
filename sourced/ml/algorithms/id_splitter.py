@@ -40,11 +40,11 @@ DEFAULT_THRESHOLD = 0.5  # threshold that is used to binarize predictions of the
 TEST_SIZE = 0.2  # fraction of dataset to use as test
 
 # CSV default parameters
-TOKEN_COL = 0
-TOKEN_SPLIT_COL = 1
+TOKEN_COL = 3
+TOKEN_SPLIT_COL = 4
 
 # RNN default parameters
-DEFAULT_RNN_TYPE = "CuDNNLSTM"
+DEFAULT_RNN_TYPE = "LSTM"
 RNN_TYPES = ("GRU", "LSTM", "CuDNNLSTM", "CuDNNGRU")
 
 # CNN default parameters
@@ -84,8 +84,7 @@ def add_output_layer(input_layer):
     return TimeDistributed(Dense(1, activation="sigmoid"))(norm_input)
 
 
-def add_rnn(X, units=128, rnn_layer=None, dev0="/gpu:0",
-            dev1="/gpu:1"):
+def add_rnn(X, units=128, rnn_layer=None, dev0="/gpu:0", dev1="/gpu:1"):
     """
     Add a RNN layer according to parameters.
     :param X: input layer
@@ -145,12 +144,9 @@ def prepare_rnn_model(args: argparse.ArgumentParser):
 
         output = add_output_layer(hid_layer)
 
-    # prepare optimizer
-    opt = keras.optimizers.get(optimizer)(lr=args.rate)
-
     # compile model
     model = Model(inputs=char_seq, outputs=output)
-    model.compile(optimizer=opt, loss=LOSS, metrics=METRICS)
+    model.compile(optimizer=optimizer, loss=LOSS, metrics=METRICS)
     return model
 
 
@@ -278,17 +274,22 @@ def f1score(y_true, y_pred):
     return 2 * prec * rec / (prec + rec + K.epsilon())
 
 
-def to_binary(mat, threshold):
+def to_binary(mat, threshold, inplace=True):
     """
     Helper function to binarize matrix
     :param mat: matrix or array
     :param threshold: if value >= threshold than it will be 1, else 0
+    :param inplace: whether modify mat inplace or not
     :return: binarized matrix
     """
     mask = mat >= threshold
-    mat[mask] = 1
-    mat[np.logical_not(mask)] = 0
-    return mat
+    if inplace:
+        mat_ = mat
+    else:
+        mat_ = mat.copy()
+    mat_[mask] = 1
+    mat_[np.logical_not(mask)] = 0
+    return mat_
 
 
 def precision_np(y_true, y_pred, epsilon=EPSILON):
@@ -340,47 +341,6 @@ def report(model, X, y, batch_size=VAL_BATCH_SIZE, threshold=DEFAULT_THRESHOLD, 
     log.info("precision: {:.3f}, recall: {:.3f}, f1: {:.3f}".format(pr, rec, f1))
 
 
-def load_model(path, add_precision: bool=True, add_recall: bool=True, add_f1score: bool=True,
-               print_fn=None):
-    """
-    Load saved model and print summary.
-    :param path: location of the saved model
-    :param add_precision: if precision should be added to custom objects
-    :param add_recall: if recall should be added to custom objects
-    :param add_f1score: if f1score should be added to custom objects
-    :param print_fn: print function to use. If None than print will be used
-    :return: model
-    """
-    custom_obj = {}
-    if add_precision:
-        custom_obj["precision"] = precision
-    if add_recall:
-        custom_obj["recall"] = recall
-    if add_f1score:
-        custom_obj["f1score"] = f1score
-
-    model = keras.models.load_model(path, custom_objects=custom_obj)
-
-    if print_fn is None:
-        print_fn = print
-
-    model.summary(print_fn=print_fn)
-
-    return model
-
-
-def load_features(path):
-    """
-    Load features. It should be pickled dictionary with 4 keys: 'x_tr', 'x_t', 'y_tr', 'y_t'.
-    :param path: location of pickle file
-    :return: x_tr, x_t, y_tr, y_t
-    """
-    with open(path, "rb") as f:
-        data = pickle.load(f)
-
-    return data["x_tr"], data["x_t"], data["y_tr"], data["y_t"]
-
-
 def config_keras():
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -388,14 +348,27 @@ def config_keras():
 
 
 def prepare_train_generator(x, y, batch_size=500):
+    assert x.shape[0] == y.shape[0], "Number of samples mismatch in x and y."
+
     def xy_generator():
         while True:
             n_batches = x.shape[0] // batch_size
+            if n_batches * batch_size < x.shape[0]:
+                n_batches += 1  # to yield last samples
             for i in range(n_batches):
                 st = i * batch_size
-                end = (i + 1) * batch_size
-                yield (x[st:end], y[st:end])
+                end = min((i + 1) * batch_size, x.shape[0])
+                yield x[st:end], y[st:end]
     return xy_generator()
+
+
+def prepare_schedule(lr=0.001, final_lr=0.00001, n_epochs=10):
+    delta = (lr - final_lr) / n_epochs
+
+    def schedule(epoch):
+        assert 0 <= epoch < n_epochs
+        return lr - delta * epoch
+    return schedule
 
 
 def make_lr_scheduler(lr=0.001, final_lr=0.00001, n_epochs=10, verbose=1):
@@ -407,18 +380,13 @@ def make_lr_scheduler(lr=0.001, final_lr=0.00001, n_epochs=10, verbose=1):
     :param verbose: verbosity
     :return: LearningRateScheduler with linear schedul of learning rates
     """
-    delta = (lr - final_lr) / (n_epochs + 1)
-
-    def schedule(epoch):
-        assert 0 <= epoch < n_epochs
-        return lr - delta * epoch
-
+    schedule = prepare_schedule(lr, final_lr, n_epochs)
     return LearningRateScheduler(schedule=schedule, verbose=verbose)
 
 
 def prepare_devices(args: argparse.ArgumentParser):
     """
-    Extract devices from arguments
+    Extract devices from arguments.
     :param args: arguments
     :return: splitted devices
     """
@@ -458,9 +426,9 @@ def prepare_callbacks(output_dir):
     return [tensorboard, csv_logger, model_saver]
 
 
-def train_parameters(batch_size, samples_per_epoch, n_samples, epochs):
+def generator_parameters(batch_size, samples_per_epoch, n_samples, epochs):
     """
-    Helper function to split huge dataset into smaller one to make reports more frequently
+    Helper function to split huge dataset into smaller one to make reports more frequently.
     :param batch_size: batch size
     :param samples_per_epoch: number of samples per mini-epoch or before report
     :param n_samples: total number of samples
@@ -473,11 +441,20 @@ def train_parameters(batch_size, samples_per_epoch, n_samples, epochs):
     return steps_per_epoch, n_epochs
 
 
-def prepare_features(csv_loc, use_header=True, token_col=TOKEN_COL, maxlen=MAXLEN, mode="r",
-                     token_split_col=TOKEN_SPLIT_COL, test_size=0.2, padding=PADDING):
+def read_identifiers(csv_loc, use_header=True, mode="r", maxlen=MAXLEN, token_col=TOKEN_COL,
+                     token_split_col=TOKEN_SPLIT_COL, shuffle=True):
+    """
+    Read and filter too long identifiers from CSV file.
+    :param csv_loc: location of CSV file
+    :param use_header: use header as normal line (True) or treat as header line with column names
+    :param mode: mode to read tarfile
+    :param maxlen: maximum length of raw identifier. If it's longer than skip it
+    :param token_col: column in CSV file for raw token
+    :param token_split_col: column in CSV file for splitted token
+    :param shuffle: shuffle or not list of identifiers
+    :return: list of splitted tokens
+    """
     log = logging.getLogger("id-splitter-prep")
-
-    # read data from file
     log.info("Reading data from CSV...")
     identifiers = []
     with tarfile.open(csv_loc, mode=mode, encoding="utf-8") as f:
@@ -489,8 +466,21 @@ def prepare_features(csv_loc, use_header=True, token_col=TOKEN_COL, maxlen=MAXLE
             parts = line.decode("utf-8").strip().split(",")
             if len(parts[token_col]) <= maxlen:
                 identifiers.append(parts[token_split_col])
-    np.random.shuffle(identifiers)
+    if shuffle:
+        np.random.shuffle(identifiers)
     log.info("Number of identifiers after filtering: {}.".format(len(identifiers)))
+    return identifiers
+
+
+def prepare_features(csv_loc, use_header=True, token_col=TOKEN_COL, maxlen=MAXLEN, mode="r",
+                     token_split_col=TOKEN_SPLIT_COL, shuffle=True, test_size=0.2,
+                     padding=PADDING):
+    log = logging.getLogger("id-splitter-prep")
+
+    # read data from file
+    identifiers = read_identifiers(csv_loc=csv_loc, use_header=use_header, token_col=token_col,
+                                   maxlen=maxlen, mode=mode, token_split_col=token_split_col,
+                                   shuffle=shuffle)
 
     # convert identifiers into character indices and labels
     log.info("Converting identifiers to character indices...")
@@ -552,16 +542,16 @@ def pipeline(args: argparse.ArgumentParser, prepare_model):
                                             test_size=args.test_size, padding=args.padding)
 
     # prepare train generator
-    steps_per_epoch, n_epochs = train_parameters(batch_size=args.batch_size,
-                                                 samples_per_epoch=args.samples_before_report,
-                                                 n_samples=x_tr.shape[0], epochs=args.epochs)
+    steps_per_epoch, n_epochs = generator_parameters(batch_size=args.batch_size,
+                                                     samples_per_epoch=args.samples_before_report,
+                                                     n_samples=x_tr.shape[0], epochs=args.epochs)
 
     train_gen = prepare_train_generator(x=x_tr, y=y_tr, batch_size=args.batch_size)
 
     # prepare test generator
-    validation_steps, _ = train_parameters(batch_size=args.val_batch_size,
-                                           samples_per_epoch=x_t.shape[0],
-                                           n_samples=x_t.shape[0], epochs=args.epochs)
+    validation_steps, _ = generator_parameters(batch_size=args.val_batch_size,
+                                               samples_per_epoch=x_t.shape[0],
+                                               n_samples=x_t.shape[0], epochs=args.epochs)
     test_gen = prepare_train_generator(x=x_t, y=y_t, batch_size=args.val_batch_size)
 
     # initialize model
@@ -571,9 +561,8 @@ def pipeline(args: argparse.ArgumentParser, prepare_model):
 
     # callbacks
     callbacks = prepare_callbacks(args.output)
-    if not args.skip_lr_scheduler:
-        lr_scheduler = make_lr_scheduler(lr=args.rate, final_lr=args.final_rate, n_epochs=n_epochs)
-        callbacks.append(lr_scheduler)
+    lr_scheduler = make_lr_scheduler(lr=args.rate, final_lr=args.final_rate, n_epochs=n_epochs)
+    callbacks.append(lr_scheduler)
 
     # train
     history = model.fit_generator(train_gen, steps_per_epoch=steps_per_epoch,

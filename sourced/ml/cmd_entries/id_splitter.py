@@ -51,8 +51,6 @@ def add_id_splitter_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--seed", type=int, default=RANDOM_SEED, help="Random seed.")
     parser.add_argument("--num-chars", type=int, default=len(string.ascii_lowercase),
                         help="Number of unique characters.")
-    parser.add_argument("--skip-lr-scheduler", action="store_true",
-                        help="Skip learning rate scheduler.")
     parser.add_argument("--devices", default=DEFAULT_DEVICES, help="Device(s) to use. '-1' means "
                                                                    "CPU.")
     parser.add_argument("--csv-token", default=TOKEN_COL, help="Column with raw token.")
