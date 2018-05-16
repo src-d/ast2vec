@@ -38,6 +38,7 @@ setup(
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0,<2.0"],
+        "keras": ["keras>=2.0,<3.0"],
     },
     package_data={"": ["LICENSE.md", "README.md"],
                   "sourced": ["ml/transformers/languages.yml"], },

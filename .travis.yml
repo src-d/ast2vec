@@ -28,7 +28,7 @@ _install: &_install
   - export SPARK_HOME=~/$SPARK_NAME
   - export PATH=$PATH:$SPARK_HOME/bin
   - export PYTHONPATH=$SPARK_HOME/python/:$SPARK_HOME/python/lib/py4j-0.10.4-src.zip
-  - pip install tensorflow
+  - pip install tensorflow keras
   - pip install -r requirements.txt codecov
   - pip install -e .
 _coverage: &_coverage
