@@ -47,7 +47,7 @@ class DocumentFrequencies(Model):
 
     def dump(self):
         return """Number of words: %d
-Random 10 words: %s
+First 10 words: %s
 Number of documents: %d""" % (
             len(self._df), dict(islice(self._df.items(), 10)), self.docs)
 
