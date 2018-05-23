@@ -42,7 +42,7 @@ First 10 words: ['get', 'name', 'type', 'string', 'class', 'set', 'data', 'value
  'uuid': 'f64bacd4-67fb-4c64-8382-399a8e7db52a',
  'version': [0, 1, 0]}
 Number of words: 982
-""" + "Random 10 words: "
+""" + "First 10 words: "
 
     BOW_DUMP = """{'created_at': datetime.datetime(2018, 1, 18, 21, 59, 59, 200818),
  'dependencies': [{'created_at': datetime.datetime(2018, 1, 18, 21, 59, 48, 828287),
