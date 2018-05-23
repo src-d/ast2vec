@@ -27,8 +27,10 @@ class MainTests(unittest.TestCase):
             "repos2id_distance": "repos2id_distance_entry",
             "repos2id_sequence": "repos2id_sequence_entry",
         }
+        ignore_action = ["id_split"]
         parser = main.get_parser()
-        subcommands = set([x.dest for x in parser._subparsers._actions[2]._choices_actions])
+        subcommands = set([x.dest for x in parser._subparsers._actions[2]._choices_actions
+                           if x.dest not in ignore_action])
         set_action2handler = set(action2handler)
         self.assertFalse(len(subcommands - set_action2handler),
                          "You forgot to add to this test {} subcommand(s) check".format(

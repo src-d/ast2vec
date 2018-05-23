@@ -13,3 +13,4 @@ from sourced.ml.cmd_entries.run_swivel import run_swivel
 from sourced.ml.cmd_entries.repos2roles_and_ids import repos2roles_and_ids_entry
 from sourced.ml.cmd_entries.repos2id_distance import repos2id_distance_entry
 from sourced.ml.cmd_entries.repos2id_sequence import repos2id_sequence_entry
+from sourced.ml.cmd_entries.id_splitter import add_id_splitter_arguments
