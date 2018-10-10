@@ -71,6 +71,7 @@ And you are sure that the daemon is running, then you need to add your user to `
 ## Contributions
 
 ...are welcome! See [CONTRIBUTING](contributing.md) and [CODE\_OF\_CONDUCT.md](code_of_conduct.md).
+Please be sure that you sign off the Developer Certificate of Origin (DCO) in your PR commits.
 
 ## License
 
