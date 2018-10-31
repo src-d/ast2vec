@@ -25,7 +25,7 @@ Pull Requests \(PRs\) are the main and exclusive way to contribute to the offici
 
 * Code Coverage does not decrease.
 * All the tests pass.
-* The code is formatted according to [![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/).
+* The code is formatted according to [![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
 * If the PR is a bug fix, it has to include a new unit test that fails before the patch is merged.
 * If the PR is a new feature, it has to come with a suite of unit tests, that tests the new functionality.
 * In any case, all the PRs have to pass the personal evaluation of at least one of the [maintainers](maintainers.md).
