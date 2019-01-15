@@ -4,7 +4,7 @@ bblfsh==2.12.6
 modelforge==0.9.3
 sourced-engine==0.7.0
 parquet==1.2
-numpy==1.15.4
+numpy==1.16.0
 humanize==0.5.1
 pygments==2.3.0
 keras==2.2.4
