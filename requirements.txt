@@ -9,4 +9,4 @@ humanize==0.5.1
 pygments==2.3.0
 keras==2.2.4
 scikit-learn==0.20.0
-tqdm==4.28.1
+tqdm==4.30.0
