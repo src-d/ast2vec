@@ -33,7 +33,7 @@ setup(
     install_requires=[
         "PyStemmer>=1.3,<2.0",
         "bblfsh>=2.2.1,<3.0",
-        "modelforge>=0.9.3,<0.10",
+        "modelforge>=0.9.3,<0.12",
         "sourced-engine>=0.7.0,<1.1",
         "humanize>=0.5.0,<0.6",
         "parquet>=1.2,<2.0",
