@@ -42,11 +42,11 @@ setup(
         "scikit-learn>=0.19,<1.0",
         "tqdm>=4.20,<5.0",
         "typing;python_version<'3.5'",
+        "pandas<0.21",
     ],
     extras_require={
         "tf": ["tensorflow>=1.0,<2.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0,<2.0"],
-        "pandas": ["pandas>=0.24.1,<1.0"],
     },
     tests_require=["docker>=3.6.0,<4.0"],
     package_data={"": ["LICENSE.md", "README.md"],
