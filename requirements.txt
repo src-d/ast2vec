@@ -1,6 +1,6 @@
 Cython>=0.28,<1.0; python_version == '3.7'
 PyStemmer==1.3.0
-bblfsh==2.12.7
+bblfsh==3.0.0
 modelforge==0.12.0
 sourced-jgit-spark-connector==2.0.1
 parquet==1.2
