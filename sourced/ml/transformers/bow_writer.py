@@ -79,7 +79,7 @@ class BOWWriter(Transformer):
             filename = self.get_bow_file_name(self.filename, i)
             BOW() \
                 .construct(docs, tokens, matrix) \
-                .save(filename, deps=(self.df,))
+                .save(filename, series="Bow", deps=(self.df,))
             self._log.info("%d -> %s with %d documents, %d nnz (%s)",
                            i + 1, filename, len(docs), size,
                            humanize.naturalsize(os.path.getsize(filename)))
