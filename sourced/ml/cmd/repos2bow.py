@@ -96,7 +96,7 @@ def repos2bow_template(args, cache_hook: Transformer = None,
         bags_writer \
             .link(Repartitioner.maybe(
                 args.partitions, keymap=lambda x: x[Uast2BagFeatures.Columns.document])) \
-            .link(BOWWriter(document_indexer, df_model, bow, args.batch)) \
+            .link(BOWWriter(document_indexer, df_model, bow, "repos2bow", args.batch)) \
             .execute()
         bags.unpersist()
     pipeline_graph(args, log, root)
