@@ -100,7 +100,7 @@ class TokenParser:
             return word
         return self._stemmer.stemWord(word)
 
-    def split(self, token):
+    def _split(self, token):
         token = token.strip()[:self.max_token_length]
 
         def meta_decorator(func):
@@ -129,9 +129,9 @@ class TokenParser:
                     yield ret.prev_p + r
                     ret.prev_p = ""
             elif not self._single_shot:
-                    ret.prev_p = r
-                    yield ret.last_subtoken + r
-                    ret.last_subtoken = ""
+                ret.prev_p = r
+                yield ret.last_subtoken + r
+                ret.last_subtoken = ""
         ret.prev_p = ""
         ret.last_subtoken = ""
 
@@ -166,6 +166,20 @@ class TokenParser:
             if last:
                 yield from ret(last)
 
+    def split(self, token):
+        """Splits a single identifier
+        """
+        if self.use_nn:
+            return self.id_splitter_model([token]).pop()
+        return self._split(token)
+
+    def split_batch(self, tokens):
+        """Splits a batch of identifiers
+        """
+        if self.use_nn:
+            return self.id_splitter_model(tokens)
+        return map(self._split, tokens)
+
     @staticmethod
     def reconstruct(tokens):
         res = []
@@ -179,6 +193,7 @@ class TokenParser:
             elif meta == TokenStyle.TOKEN_CAPITALIZED:
                 res.append(t[0].upper() + t[1:])
         return "".join(res)
+    # def _nn_split(self, tokens):
 
     def __getstate__(self):
         state = self.__dict__.copy()
