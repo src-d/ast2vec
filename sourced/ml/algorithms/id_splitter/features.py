@@ -2,13 +2,11 @@ import logging
 import string
 import tarfile
 from typing import List, Tuple
-from memory_profiler import profile
 
 from modelforge.progress_bar import progress_bar
 import numpy
 
 
-@profile
 def read_identifiers(csv_path: str, use_header: bool, max_identifier_len: int, identifier_col: int,
                      split_identifier_col: int, shuffle: bool = True) -> List[str]:
     """
@@ -43,7 +41,6 @@ def read_identifiers(csv_path: str, use_header: bool, max_identifier_len: int, i
     return identifiers
 
 
-@profile
 def prepare_features(csv_path: str, use_header: bool, max_identifier_len: int,
                      identifier_col: int, split_identifier_col: int, test_ratio: float,
                      padding: str, shuffle: bool = True) -> Tuple[numpy.array]:

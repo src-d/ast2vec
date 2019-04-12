@@ -2,7 +2,6 @@ import argparse
 import logging
 import os
 import pickle
-from memory_profiler import profile
 
 
 def train_id_split(args: argparse.ArgumentParser):
