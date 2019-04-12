@@ -10,35 +10,10 @@ from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
 from sourced.ml.algorithms.id_splitter.nn_model import f1score
 from sourced.ml.models.license import DEFAULT_LICENSE
+from sourced.ml.algorithms.id_splitter.nn_model import compute_precision, compute_recall, f1score
 
-MAXLEN = 40
+AXLEN = 40
 PADDING = "post"
-
-
-def compute_precision(y_true, y_pred):
-    """Precision metric.
-    Only computes a batch-wise average of precision.
-
-    Computes the precision, a metric for multi-label classification of
-    how many selected items are relevant.
-    """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-
-def compute_recall(y_true, y_pred):
-    """Recall metric.
-    Only computes a batch-wise average of recall.
-
-    Computes the recall, a metric for multi-label classification of
-    how many relevant items are selected.
-    """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
 
 
 @register_model
