@@ -1,15 +1,15 @@
 import logging
-
-from modelforge import Model, register_model
-from sourced.ml.models.license import DEFAULT_LICENSE
-import keras
-from keras.preprocessing.sequence import pad_sequences
-import tensorflow
-import numpy as np
-import string
-from keras import backend as K
-from sourced.ml.algorithms.id_splitter.nn_model import f1score
 import os
+import string
+
+import keras
+import numpy as np
+import tensorflow
+from keras import backend as K
+from keras.preprocessing.sequence import pad_sequences
+from modelforge import Model, register_model
+from sourced.ml.algorithms.id_splitter.nn_model import f1score
+from sourced.ml.models.license import DEFAULT_LICENSE
 
 MAXLEN = 40
 PADDING = "post"
