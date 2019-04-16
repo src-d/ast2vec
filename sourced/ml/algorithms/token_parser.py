@@ -33,14 +33,16 @@ class TokenParser:
     # if True we have only ["sourc", "algorithm"].
     # if you do not want to filter small tokens set min_split_length=1.
     SAVE_TOKEN_STYLE = False  # whether yield metadata that can be used to reconstruct initial
-    # identifier.
+
+    # identifier
+    USE_NN = False  # wether to use neural network id splitter model instead of heuristic
     ATTACH_UPPER = True  # True to attach the last of several uppercase letters in a row to
     # the next token. Example: 'HTMLResponse' -> ["html", "response"] if True,
     # 'HTMLResponse' -> ["htmlr", "esponse"] if False.
 
     def __init__(self, stem_threshold=STEM_THRESHOLD, max_token_length=MAX_TOKEN_LENGTH,
                  min_split_length=MIN_SPLIT_LENGTH, single_shot=DEFAULT_SINGLE_SHOT,
-                 save_token_style=SAVE_TOKEN_STYLE, attach_upper=ATTACH_UPPER):
+                 save_token_style=SAVE_TOKEN_STYLE, attach_upper=ATTACH_UPPER, use_nn=USE_NN):
         self._stemmer = Stemmer.Stemmer("english")
         self._stemmer.maxCacheSize = 0
         self._stem_threshold = stem_threshold
@@ -49,6 +51,7 @@ class TokenParser:
         self._single_shot = single_shot
         self._save_token_style = save_token_style
         self._attach_upper = attach_upper
+        self._use_nn = use_nn
         if self._save_token_style and not self._single_shot:
             raise ValueError("Only one of `single_shot`/`save_token_style` should be True")
 

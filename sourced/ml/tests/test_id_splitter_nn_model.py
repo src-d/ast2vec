@@ -1,9 +1,12 @@
 import string
 import unittest
+import tempfile
 
 import numpy
 
 from sourced.ml.tests import has_tensorflow
+from sourced.ml.models.id_splitter import IdentifierSplitterNN
+from sourced.ml.tests.models import ID_SPLITTER_RNN
 
 
 class MetricsTests(unittest.TestCase):
@@ -50,6 +53,28 @@ class ModelsTests(unittest.TestCase):
         self.assertIsInstance(self.model_cnn.get_weights()[0], numpy.ndarray)
         self.assertEqual(self.model_cnn.get_weights()[0].shape, (self.n_uniq+1, self.n_uniq+1))
         self.assertTrue(self.model_cnn.uses_learning_phase)
+
+
+class NNModelTest(unittest.TestCase):
+
+    def setUp(self):
+        self.test_X = ["networkSocket", "variablename", "loadfile", "blahblah", 'foobar']
+        self.test_y = ['network', 'socket', 'variable',
+                       'name', 'load', 'file', 'blah', 'blah', 'foobar']
+        self.id_splitter = IdentifierSplitterNN()
+        self.id_splitter.load(ID_SPLITTER_RNN)
+
+    @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
+    def test_load_and_run_model(self):
+        self.assertEqual(self.id_splitter(self.test_X), self.test_y)
+
+    @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
+    def test_save_model(self):
+        with tempfile.NamedTemporaryFile() as tmp:
+            print(tmp)
+            self.id_splitter.save("/tmp/model.asdf", series="id-splitter-nn")
+            self.id_splitter.load("/tmp/model.asdf")
+        self.assertEqual(self.id_splitter(self.test_X), self.test_y)
 
 
 if __name__ == "__main__":

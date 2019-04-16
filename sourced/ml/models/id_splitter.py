@@ -10,9 +10,9 @@ from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
 from sourced.ml.algorithms.id_splitter.nn_model import f1score
 from sourced.ml.models.license import DEFAULT_LICENSE
-from sourced.ml.algorithms.id_splitter.nn_model import compute_precision, compute_recall, f1score
+from sourced.ml.algorithms.id_splitter.nn_model import precision, recall, f1score
 
-AXLEN = 40
+MAXLEN = 40
 PADDING = "post"
 
 
@@ -97,8 +97,8 @@ class IdentifierSplitterNN(Model):
 
     def load_model_file(self, path="./id_splitter_rnn.model"):
 
-        self._model = keras.models.load_model(path, custom_objects={"precision": compute_precision,
-                                                                    "recall": compute_recall,
+        self._model = keras.models.load_model(path, custom_objects={"precision": precision,
+                                                                    "recall": recall,
                                                                     "f1score": f1score})
 
     def __call__(self, tokens: [str]) -> [[str]]:

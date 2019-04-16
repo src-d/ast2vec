@@ -11,6 +11,7 @@ COOCC = join(_models_path, "coocc.asdf")
 COOCC_DF = join(_models_path, "coocc_df.asdf")
 UAST = join(_models_path, "uast.asdf")
 TOPICS = join(_models_path, "topics.asdf")
+ID_SPLITTER_RNN = join(_models_path, "id_splitter_rnn.asdf")
 
 DATA_DIR_SOURCE = join(_root, "source")
 SOURCE_FILENAME = "example"
