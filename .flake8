@@ -4,6 +4,7 @@ max-line-length=99
 exclude=
     .git
     doc
+    venv
 inline-quotes="
 import-order-style=appnexus
 application-package-names=sourced.ml

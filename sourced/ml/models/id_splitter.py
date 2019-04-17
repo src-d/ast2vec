@@ -4,10 +4,10 @@ import string
 
 import keras
 import numpy as np
+import tensorflow as tf
 from keras import backend
 from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
-
 from sourced.ml.algorithms.id_splitter.nn_model import (f1score, precision,
                                                         recall)
 from sourced.ml.models.license import DEFAULT_LICENSE
@@ -27,9 +27,8 @@ class IdentifierSplitterNN(Model):
     LICENSE = DEFAULT_LICENSE
 
     def construct(self, model: "keras.models.Model" = None,
-                  session: "tensorflow.Session" = None):
+                  session: "tf.Session" = None):
         assert model is not None
-        import tensorflow as tf
 
         if session is None:
             config = tf.ConfigProto()
