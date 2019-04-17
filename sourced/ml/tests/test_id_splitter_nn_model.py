@@ -1,11 +1,11 @@
 import string
-import unittest
 import tempfile
+import unittest
 
 import numpy
 
-from sourced.ml.tests import has_tensorflow
 from sourced.ml.models.id_splitter import IdentifierSplitterNN
+from sourced.ml.tests import has_tensorflow
 from sourced.ml.tests.models import ID_SPLITTER_RNN
 
 
@@ -58,9 +58,9 @@ class ModelsTests(unittest.TestCase):
 class NNModelTest(unittest.TestCase):
 
     def setUp(self):
-        self.test_X = ["networkSocket", "variablename", "loadfile", "blahblah", 'foobar']
-        self.test_y = ['network', 'socket', 'variable',
-                       'name', 'load', 'file', 'blah', 'blah', 'foobar']
+        self.test_X = ["networkSocket", "variablename", "loadfile", "blahblah", "foobar"]
+        self.test_y = ["network", "socket", "variable",
+                       "name", "load", "file", "blah", "blah", "foobar"]
         self.id_splitter = IdentifierSplitterNN()
         self.id_splitter.load(ID_SPLITTER_RNN)
 
@@ -70,10 +70,9 @@ class NNModelTest(unittest.TestCase):
 
     @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
     def test_save_model(self):
-        with tempfile.NamedTemporaryFile() as tmp:
-            print(tmp)
-            self.id_splitter.save("/tmp/model.asdf", series="id-splitter-nn")
-            self.id_splitter.load("/tmp/model.asdf")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.id_splitter.save(tmpdir + "/model.asdf", series="id-splitter-nn")
+            self.id_splitter.load(tmpdir + "/model.asdf")
         self.assertEqual(self.id_splitter(self.test_X), self.test_y)
 
 

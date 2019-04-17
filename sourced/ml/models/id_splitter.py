@@ -4,13 +4,13 @@ import string
 
 import keras
 import numpy as np
-import tensorflow
-from keras import backend as K
+from keras import backend
 from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
-from sourced.ml.algorithms.id_splitter.nn_model import f1score
+
+from sourced.ml.algorithms.id_splitter.nn_model import (f1score, precision,
+                                                        recall)
 from sourced.ml.models.license import DEFAULT_LICENSE
-from sourced.ml.algorithms.id_splitter.nn_model import precision, recall, f1score
 
 MAXLEN = 40
 PADDING = "post"
@@ -30,13 +30,14 @@ class IdentifierSplitterNN(Model):
                   session: "tensorflow.Session" = None):
         assert model is not None
         import tensorflow as tf
+
         if session is None:
             config = tf.ConfigProto()
             tf_session = tf.Session(config=config)
+            backend.tensorflow_backend.set_session(tf_session)
         else:
             backend.tensorflow_backend.set_session(session)
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-        from keras import backend
         config.gpu_options.allow_growth = True
 
         self._model = model
@@ -77,7 +78,7 @@ class IdentifierSplitterNN(Model):
         if len(clean_id) > MAXLEN:
             clean_id = clean_id[:MAXLEN]
         logging.info("Preprocessed identifier: {}".format(clean_id))
-        return np.array([mapping[c] for c in clean_id], dtype='int8'), clean_id
+        return np.array([mapping[c] for c in clean_id], dtype="int8"), clean_id
 
     def prepare_input(self, identifiers: [str], maxlen: int = MAXLEN, padding: int = PADDING,
                       mapping=None):
@@ -114,7 +115,7 @@ class IdentifierSplitterNN(Model):
             for char, label in zip(clean_id, id_output):
                 if label == 1:
                     splitted_ids.append(splitted_id)
-                    splitted_id = ''
+                    splitted_id = ""
                 splitted_id += char
             splitted_ids.append(splitted_id)
         return splitted_ids
