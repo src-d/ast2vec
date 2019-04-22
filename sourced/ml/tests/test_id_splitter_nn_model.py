@@ -67,14 +67,14 @@ class NNModelTest(unittest.TestCase):
 
     @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
     def test_load_and_run_model(self):
-        self.assertEqual(self.id_splitter(self.test_X), self.test_y)
+        self.assertEqual(self.id_splitter.split(self.test_X), self.test_y)
 
     @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
     def test_save_model(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             self.id_splitter.save(tmpdir + "/model.asdf", series="id-splitter-nn")
             self.id_splitter.load(tmpdir + "/model.asdf")
-        self.assertEqual(self.id_splitter(self.test_X), self.test_y)
+        self.assertEqual(self.id_splitter.split(self.test_X), self.test_y)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 import logging
 import os
 import string
+from typing import List, Sequence, Tuple
 
 import keras
 from keras import backend
 from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
 import numpy as np
-# import tensorflow as tf
 
 from sourced.ml.algorithms.id_splitter.nn_model import (f1score, precision,
                                                         recall)
@@ -28,23 +28,21 @@ class IdentifierSplitterNN(Model):
     LICENSE = DEFAULT_LICENSE
 
     def construct(self, model: "keras.models.Model" = None,
-                  session: "tf.Session" = None):
+                  session: "tf.Session" = None, maxlen: int = MAXLEN,
+                  padding: str = PADDING) -> "IdentifierSplitterNN":
         assert model is not None
 
         if session is not None:
-            # config = tf.ConfigProto()
-            # config.gpu_options.allow_growth = True
-            # tf_session = tf.Session(config=config)
-            # backend.tensorflow_backend.set_session(tf_session)
-            # else:
             backend.tensorflow_backend.set_session(session)
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 
+        self._maxlen = maxlen
+        self._padding = padding
         self._model = model
         return self
 
     @property
-    def model(self):
+    def model(self) -> "keras.models.Model":
         """
         Returns the wrapped keras model.
         """
@@ -58,20 +56,20 @@ class IdentifierSplitterNN(Model):
 
     def _generate_tree(self) -> dict:
         return {
-                "config": self._model.get_config(),
-                "weights": self._model.get_weights()
-                }
+            "config": self._model.get_config(),
+            "weights": self._model.get_weights()
+            }
 
     def _load_tree(self, tree: dict):
-        from keras.models import Model
 
-        model = Model.from_config(tree["config"])
+        model = keras.models.Model.from_config(tree["config"])
         model.set_weights(tree["weights"])
         self.construct(model=model)
 
-    def _prepare_single_identifier(self, identifier, maxlen=MAXLEN, padding=PADDING, mapping=None):
+    def _prepare_single_identifier(self, identifier: str, maxlen: int=MAXLEN, padding: int=PADDING,
+                                   mapping: dict=None) -> "np.array":
         if mapping is None:
-            mapping = dict((c, i + 1) for i, c in enumerate(string.ascii_lowercase))
+            mapping = {c: i for i, c in enumerate(string.ascii_lowercase, start=1)}
 
         # Clean identifier
         clean_id = "".join([char for char in identifier.lower() if char in string.ascii_lowercase])
@@ -80,8 +78,11 @@ class IdentifierSplitterNN(Model):
         logging.info("Preprocessed identifier: {}".format(clean_id))
         return np.array([mapping[c] for c in clean_id], dtype="int8"), clean_id
 
-    def prepare_input(self, identifiers: [str], maxlen: int = MAXLEN, padding: int = PADDING,
-                      mapping=None):
+    def prepare_input(self, identifiers: Sequence[str], maxlen: int = MAXLEN,
+                      padding: int = PADDING, mapping: dict=None) -> Tuple["np.array", List[str]]:
+        """Prepares input by converting a sequence of identifiers to the corresponding
+        ascii code 2D-array and the list of lowercase cleaned identifiers.
+        """
 
         processed_ids = []
         clean_ids = []
@@ -96,18 +97,18 @@ class IdentifierSplitterNN(Model):
 
         return processed_ids, clean_ids
 
-    def load_model_file(self, path="./id_splitter_rnn.model"):
-
+    def load_model_file(self, path=None):
+        assert path is not None
         self._model = keras.models.load_model(path, custom_objects={"precision": precision,
                                                                     "recall": recall,
                                                                     "f1score": f1score})
 
-    def __call__(self, tokens: [str]) -> [[str]]:
+    def split(self, tokens: Sequence[str]) -> List[str]:
         """
         Splits a lists of tokens using the model.
         """
-        feats, clean_ids = self.prepare_input(tokens)
-        output = self._model.predict(feats)
+        feats, clean_ids = self.prepare_input(tokens, maxlen=self._maxlen, padding=self._padding)
+        output = self._model.predict(feats, batch_size=4096)
         output = np.round(output)[:, :, 0]
         splitted_ids = []
         for clean_id, id_output in zip(clean_ids, output):
