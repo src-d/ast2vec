@@ -7,7 +7,7 @@ from keras import backend
 from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 
 from sourced.ml.algorithms.id_splitter.nn_model import (f1score, precision,
                                                         recall)
@@ -31,14 +31,14 @@ class IdentifierSplitterNN(Model):
                   session: "tf.Session" = None):
         assert model is not None
 
-        if session is None:
-            config = tf.ConfigProto()
-            tf_session = tf.Session(config=config)
-            backend.tensorflow_backend.set_session(tf_session)
-        else:
+        if session is not None:
+            # config = tf.ConfigProto()
+            # config.gpu_options.allow_growth = True
+            # tf_session = tf.Session(config=config)
+            # backend.tensorflow_backend.set_session(tf_session)
+            # else:
             backend.tensorflow_backend.set_session(session)
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-        config.gpu_options.allow_growth = True
 
         self._model = model
         return self
