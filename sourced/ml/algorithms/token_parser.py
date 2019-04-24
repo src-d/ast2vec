@@ -196,7 +196,6 @@ class TokenParser:
             elif meta == TokenStyle.TOKEN_CAPITALIZED:
                 res.append(t[0].upper() + t[1:])
         return "".join(res)
-    # def _nn_split(self, tokens):
 
     def __getstate__(self):
         state = self.__dict__.copy()

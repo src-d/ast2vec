@@ -61,7 +61,6 @@ class IdentifierSplitterNN(Model):
             }
 
     def _load_tree(self, tree: dict):
-
         model = keras.models.Model.from_config(tree["config"])
         model.set_weights(tree["weights"])
         self.construct(model=model)
@@ -83,7 +82,6 @@ class IdentifierSplitterNN(Model):
         """Prepares input by converting a sequence of identifiers to the corresponding
         ascii code 2D-array and the list of lowercase cleaned identifiers.
         """
-
         processed_ids = []
         clean_ids = []
         for identifier in identifiers:
@@ -92,8 +90,7 @@ class IdentifierSplitterNN(Model):
             processed_ids.append(feat)
             clean_ids.append(clean_id)
 
-        processed_ids = pad_sequences(processed_ids, maxlen=maxlen,
-                                      padding=padding)
+        processed_ids = pad_sequences(processed_ids, maxlen=maxlen, padding=padding)
 
         return processed_ids, clean_ids
 

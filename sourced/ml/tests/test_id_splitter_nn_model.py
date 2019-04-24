@@ -9,7 +9,6 @@ from sourced.ml.tests.models import ID_SPLITTER_RNN
 
 
 class MetricsTests(unittest.TestCase):
-
     @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
     def test_register_metric(self):
         from sourced.ml.algorithms.id_splitter.nn_model import register_metric, METRICS
@@ -56,7 +55,6 @@ class ModelsTests(unittest.TestCase):
 
 
 class NNModelTest(unittest.TestCase):
-
     def setUp(self):
         from sourced.ml.models.id_splitter import IdentifierSplitterNN
         self.test_X = ["networkSocket", "variablename", "loadfile", "blahblah", "foobar"]
