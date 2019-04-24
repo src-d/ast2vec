@@ -7,14 +7,11 @@ import keras
 from keras import backend
 from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
-import numpy as np
+import numpy
 
 from sourced.ml.algorithms.id_splitter.nn_model import (f1score, precision,
                                                         recall)
 from sourced.ml.models.license import DEFAULT_LICENSE
-
-MAXLEN = 40
-PADDING = "post"
 
 
 @register_model
@@ -27,9 +24,15 @@ class IdentifierSplitterNN(Model):
     DESCRIPTION = "Model that contains source code identifier splitter BiLSTM weights."
     LICENSE = DEFAULT_LICENSE
 
+    DEFAULT_MAXLEN = 40
+    DEFAULT_PADDING = "post"
+    DEFAULT_MAPPING = None
+
     def construct(self, model: "keras.models.Model" = None,
-                  session: "tf.Session" = None, maxlen: int = MAXLEN,
-                  padding: str = PADDING) -> "IdentifierSplitterNN":
+                  session: "tf.Session" = None,
+                  maxlen: int = DEFAULT_MAXLEN,
+                  padding: str = DEFAULT_PADDING,
+                  mapping: dict = DEFAULT_MAPPING) -> "IdentifierSplitterNN":
         assert model is not None
 
         if session is not None:
@@ -38,6 +41,7 @@ class IdentifierSplitterNN(Model):
 
         self._maxlen = maxlen
         self._padding = padding
+        self._mapping = mapping
         self._model = model
         return self
 
@@ -65,48 +69,46 @@ class IdentifierSplitterNN(Model):
         model.set_weights(tree["weights"])
         self.construct(model=model)
 
-    def _prepare_single_identifier(self, identifier: str, maxlen: int=MAXLEN, padding: int=PADDING,
-                                   mapping: dict=None) -> "np.array":
-        if mapping is None:
-            mapping = {c: i for i, c in enumerate(string.ascii_lowercase, start=1)}
+    def _prepare_single_identifier(self, identifier: str) -> numpy.array:
+        if self._mapping is None:
+            self._mapping = {c: i for i, c in enumerate(string.ascii_lowercase, start=1)}
 
         # Clean identifier
-        clean_id = "".join([char for char in identifier.lower() if char in string.ascii_lowercase])
-        if len(clean_id) > MAXLEN:
-            clean_id = clean_id[:MAXLEN]
+        clean_id = "".join(char for char in identifier.lower() if char in string.ascii_lowercase)
+        if len(clean_id) > self._maxlen:
+            clean_id = clean_id[:self._maxlen]
         logging.info("Preprocessed identifier: {}".format(clean_id))
-        return np.array([mapping[c] for c in clean_id], dtype="int8"), clean_id
+        return numpy.array([self._mapping[c] for c in clean_id], dtype="int8"), clean_id
 
-    def prepare_input(self, identifiers: Sequence[str], maxlen: int = MAXLEN,
-                      padding: int = PADDING, mapping: dict=None) -> Tuple["np.array", List[str]]:
-        """Prepares input by converting a sequence of identifiers to the corresponding
+    def prepare_input(self, identifiers: Sequence[str]) -> Tuple[numpy.array, List[str]]:
+        """
+        Prepares input by converting a sequence of identifiers to the corresponding
         ascii code 2D-array and the list of lowercase cleaned identifiers.
         """
         processed_ids = []
         clean_ids = []
         for identifier in identifiers:
-            feat, clean_id = self._prepare_single_identifier(
-                identifier, maxlen=maxlen, padding=padding)
+            feat, clean_id = self._prepare_single_identifier(identifier)
             processed_ids.append(feat)
             clean_ids.append(clean_id)
 
-        processed_ids = pad_sequences(processed_ids, maxlen=maxlen, padding=padding)
-
+        processed_ids = pad_sequences(processed_ids, maxlen=self._maxlen, padding=self._padding)
         return processed_ids, clean_ids
 
-    def load_model_file(self, path=None):
-        assert path is not None
+    def load_model_file(self, path: str):
+        """Loads a compatible Keras model file. Used for compatibility.
+        """
         self._model = keras.models.load_model(path, custom_objects={"precision": precision,
                                                                     "recall": recall,
                                                                     "f1score": f1score})
 
-    def split(self, tokens: Sequence[str]) -> List[str]:
+    def split(self, identifiers: Sequence[str]) -> List[str]:
         """
-        Splits a lists of tokens using the model.
+        Splits a lists of identifiers using the model.
         """
-        feats, clean_ids = self.prepare_input(tokens, maxlen=self._maxlen, padding=self._padding)
+        feats, clean_ids = self.prepare_input(identifiers)
         output = self._model.predict(feats, batch_size=4096)
-        output = np.round(output)[:, :, 0]
+        output = numpy.round(output)[:, :, 0]
         splitted_ids = []
         for clean_id, id_output in zip(clean_ids, output):
             splitted_id = ""

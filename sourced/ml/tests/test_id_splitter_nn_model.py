@@ -54,6 +54,7 @@ class ModelsTests(unittest.TestCase):
         self.assertTrue(self.model_cnn.uses_learning_phase)
 
 
+@unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
 class NNModelTest(unittest.TestCase):
     def setUp(self):
         from sourced.ml.models.id_splitter import IdentifierSplitterNN
@@ -63,11 +64,9 @@ class NNModelTest(unittest.TestCase):
         self.id_splitter = IdentifierSplitterNN()
         self.id_splitter.load(ID_SPLITTER_RNN)
 
-    @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
     def test_load_and_run_model(self):
         self.assertEqual(self.id_splitter.split(self.test_X), self.test_y)
 
-    @unittest.skipIf(not has_tensorflow(), "Tensorflow is not installed.")
     def test_save_model(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             self.id_splitter.save(tmpdir + "/model.asdf", series="id-splitter-nn")
