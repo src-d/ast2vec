@@ -170,14 +170,16 @@ class TokenParser:
                 yield from ret(last)
 
     def split(self, token):
-        """Splits a single identifier
+        """
+        Splits a single identifier.
         """
         if self._use_nn:
             return self.id_splitter_model([token]).pop()
         return self._split(token)
 
     def split_batch(self, tokens):
-        """Splits a batch of identifiers
+        """
+        Splits a batch of identifiers.
         """
         if self._use_nn:
             return self.id_splitter_model(tokens)

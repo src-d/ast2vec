@@ -1,10 +1,8 @@
 import logging
-import os
 import string
 from typing import List, Sequence, Tuple
 
 import keras
-from keras import backend
 from keras.preprocessing.sequence import pad_sequences
 from modelforge import Model, register_model
 import numpy
@@ -28,16 +26,10 @@ class IdentifierSplitterNN(Model):
     DEFAULT_PADDING = "post"
     DEFAULT_MAPPING = None
 
-    def construct(self, model: "keras.models.Model" = None,
-                  session: "tf.Session" = None,
+    def construct(self, model: "keras.models.Model",
                   maxlen: int = DEFAULT_MAXLEN,
                   padding: str = DEFAULT_PADDING,
                   mapping: dict = DEFAULT_MAPPING) -> "IdentifierSplitterNN":
-        assert model is not None
-
-        if session is not None:
-            backend.tensorflow_backend.set_session(session)
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 
         self._maxlen = maxlen
         self._padding = padding
@@ -61,20 +53,24 @@ class IdentifierSplitterNN(Model):
     def _generate_tree(self) -> dict:
         return {
             "config": self._model.get_config(),
-            "weights": self._model.get_weights()
+            "weights": self._model.get_weights(),
+            "mapping": self._mapping,
             }
 
     def _load_tree(self, tree: dict):
         model = keras.models.Model.from_config(tree["config"])
         model.set_weights(tree["weights"])
-        self.construct(model=model)
+        if "mapping" in tree:
+            self.construct(model, mapping=tree["mapping"])
+        else:
+            self.construct(model)
 
-    def _prepare_single_identifier(self, identifier: str) -> numpy.array:
+    def _prepare_single_identifier(self, identifier: str) -> Tuple[numpy.array, str]:
         if self._mapping is None:
             self._mapping = {c: i for i, c in enumerate(string.ascii_lowercase, start=1)}
 
         # Clean identifier
-        clean_id = "".join(char for char in identifier.lower() if char in string.ascii_lowercase)
+        clean_id = "".join(char for char in identifier.lower() if char in self._mapping)
         if len(clean_id) > self._maxlen:
             clean_id = clean_id[:self._maxlen]
         logging.info("Preprocessed identifier: {}".format(clean_id))
@@ -96,7 +92,8 @@ class IdentifierSplitterNN(Model):
         return processed_ids, clean_ids
 
     def load_model_file(self, path: str):
-        """Loads a compatible Keras model file. Used for compatibility.
+        """
+        Loads a compatible Keras model file. Used for compatibility.
         """
         self._model = keras.models.load_model(path, custom_objects={"precision": precision,
                                                                     "recall": recall,
