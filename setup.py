@@ -32,7 +32,7 @@ setup(
               "github", "swivel", "bow", "bblfsh", "babelfish"],
     install_requires=[
         "PyStemmer>=1.3,<2.0",
-        "bblfsh>=2.2.1,<3.0",
+        "bblfsh>=2.2.1,<4.0",
         "modelforge>=0.11.1,<0.13",
         "sourced-jgit-spark-connector>=2.0.1,<2.1.0",
         "humanize>=0.5.0,<0.6",
