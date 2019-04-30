@@ -19,7 +19,7 @@ class IdentifierSplitterNN(Model):
     """
     NAME = "id_splitter_nn"
     VENDOR = "source{d}"
-    DESCRIPTION = "Model that contains source code identifier splitter BiLSTM weights."
+    DESCRIPTION = "Weights of the BiLSTM network to split source code identifiers."
     LICENSE = DEFAULT_LICENSE
 
     DEFAULT_MAXLEN = 40
