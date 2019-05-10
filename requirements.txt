@@ -8,5 +8,5 @@ numpy==1.16.2
 humanize==0.5.1
 pygments==2.3.1
 keras==2.2.4
-scikit-learn==0.20.3
+scikit-learn==0.21.0
 tqdm==4.31.1
