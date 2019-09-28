@@ -16,11 +16,12 @@ class BOWWriter(Transformer):
     DEFAULT_CHUNK_SIZE = 2 * 1000 * 1000 * 1000
 
     def __init__(self, document_indexer: Indexer, df: OrderedDocumentFrequencies,
-                 filename: str, chunk_size: int = DEFAULT_CHUNK_SIZE, **kwargs):
+                 filename: str, series: str, chunk_size: int = DEFAULT_CHUNK_SIZE, **kwargs):
         super().__init__(**kwargs)
         self.document_indexer = document_indexer
         self.df = df
         self.filename = filename
+	self.series = series
         self.chunk_size = chunk_size
 
     def __getstate__(self):
@@ -79,7 +80,7 @@ class BOWWriter(Transformer):
             filename = self.get_bow_file_name(self.filename, i)
             BOW() \
                 .construct(docs, tokens, matrix) \
-                .save(filename, deps=(self.df,))
+                .save(filename, series=self.series, deps=(self.df,))
             self._log.info("%d -> %s with %d documents, %d nnz (%s)",
                            i + 1, filename, len(docs), size,
                            humanize.naturalsize(os.path.getsize(filename)))
