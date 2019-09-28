@@ -6,7 +6,7 @@ sourced-jgit-spark-connector==2.0.1
 parquet==1.2
 numpy==1.16.2
 humanize==0.5.1
-pygments==2.3.1
+pygments==2.4.0
 keras==2.2.4
 scikit-learn==0.20.3
 tqdm==4.31.1
